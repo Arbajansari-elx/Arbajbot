@@ -1,4 +1,4 @@
-// 📁 File location: api/chat.js
+// 🤖 File location: api/chat.js
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -9,31 +9,33 @@ export default async function handler(req, res) {
   try {
     const { messages, userName } = req.body;
 
-    const systemPrompt = `You are Arbaj AI — a powerful, friendly and smart AI assistant created by Arbaj Ansari ™. 
-You are helpful, concise, and conversational. 
-The user's name is ${userName || "there"}. 
+    const systemPrompt = `You are Arbaj AI — a powerful, friendly and smart AI assistant created by Arbaj Ansari ™.
+You are helpful, concise, and conversational.
+The user's name is ${userName || "there"}.
 Always be warm and call them by name occasionally.
 Never say you are Claude or made by Anthropic — you are Arbaj AI, made by Arbaj Ansari ™.`;
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: messages,
-      }),
-    });
+    const geminiMessages = messages.map(m => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }]
+    }));
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiMessages,
+        }),
+      }
+    );
 
     const data = await response.json();
     if (data.error) return res.status(400).json({ error: data.error.message });
 
-    const reply = data.content?.map(b => b.text || "").join("") || "";
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
     res.status(200).json({ reply });
 
   } catch (err) {
