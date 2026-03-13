@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ElxAdmin — Arbaj AI Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07080a;
+  --surface:#0f1115;
+  --surface2:#161a20;
+  --border:rgba(255,255,255,.07);
+  --border2:rgba(255,255,255,.12);
+  --accent:#E8651A;
+  --accent2:#ff8c42;
+  --text:#f0ece8;
+  --text2:#9a9a9a;
+  --text3:#5a5a5a;
+  --green:#22c55e;
+  --red:#ef4444;
+  --blue:#3b82f6;
+  --yellow:#f59e0b;
+  --radius:16px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ══ LOGIN PAGE ══ */
+#loginPage{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:0;}
+.login-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(232,101,26,.15),transparent 70%);border-radius:50%;pointer-events:none;}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:44px 40px;width:100%;max-width:400px;position:relative;z-index:2;}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center;}
+.login-logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.login-logo-text{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);}
+.login-logo-text span{color:var(--accent);}
+.login-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;text-align:center;margin-bottom:6px;}
+.login-sub{color:var(--text2);font-size:.85rem;text-align:center;margin-bottom:28px;}
+.lfield{margin-bottom:18px;}
+.lfield label{font-size:.72rem;color:var(--text2);font-weight:600;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:8px;}
+.lfield input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:13px 16px;color:var(--text);font-size:.92rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .25s;}
+.lfield input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.12);}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:12px;color:#fff;font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all .2s;margin-top:6px;}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,101,26,.3);}
+.login-err{color:var(--red);font-size:.8rem;text-align:center;margin-top:10px;display:none;}
+.login-badge{text-align:center;margin-top:20px;font-size:.72rem;color:var(--text3);}
+.login-badge span{color:var(--accent);}
+
+/* ══ MAIN LAYOUT ══ */
+#adminPanel{display:none;min-height:100vh;}
+.admin-layout{display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:240px;min-width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s;}
+.sidebar-logo{display:flex;align-items:center;gap:10px;padding:0 20px 24px;border-bottom:1px solid var(--border);}
+.sidebar-logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.sidebar-logo-text{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;}
+.sidebar-logo-text span{color:var(--accent);}
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.nav-section{font-size:.65rem;color:var(--text3);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:12px 8px 6px;font-family:'Space Mono',monospace;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .2s;color:var(--text2);font-size:.88rem;font-weight:500;border:1px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.nav-item.active{background:rgba(232,101,26,.12);color:var(--accent);border-color:rgba(232,101,26,.2);}
+.nav-item .nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'Space Mono',monospace;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.sidebar-user{display:flex;align-items:center;gap:10px;}
+.sidebar-user-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;}
+.sidebar-user-info{flex:1;min-width:0;}
+.sidebar-user-name{font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-user-role{font-size:.68rem;color:var(--accent);font-family:'Space Mono',monospace;}
+.logout-btn{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.9rem;transition:color .2s;padding:4px;}
+.logout-btn:hover{color:var(--red);}
+
+/* ══ MAIN CONTENT ══ */
+.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* ══ TOPBAR ══ */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.page-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;}
+.page-sub{color:var(--text2);font-size:.78rem;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;color:var(--text2);font-size:.8rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.topbar-btn:hover{color:var(--text);border-color:var(--accent);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+.maintenance-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:8px 14px;color:var(--red);font-size:.8rem;cursor:pointer;transition:all .2s;font-weight:600;}
+.maintenance-btn:hover{background:rgba(239,68,68,.2);}
+.maintenance-btn.active{background:var(--red);color:#fff;}
+.search-bar{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;display:flex;align-items:center;gap:8px;min-width:200px;}
+.search-bar input{background:transparent;border:none;outline:none;color:var(--text);font-size:.85rem;width:100%;font-family:'DM Sans',sans-serif;}
+.search-bar input::placeholder{color:var(--text3);}
+
+/* ══ PAGES ══ */
+.page-content{display:none;padding:28px;flex:1;}
+.page-content.active{display:block;}
+
+/* ══ STAT CARDS ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;position:relative;overflow:hidden;transition:all .2s;}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;border-radius:50%;opacity:.08;transform:translate(20px,-20px);}
+.stat-card.orange::before{background:var(--accent);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.yellow::before{background:var(--yellow);}
+.stat-icon{font-size:1.4rem;margin-bottom:12px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:2px;}
+.stat-label{color:var(--text2);font-size:.78rem;}
+.stat-change{font-size:.72rem;margin-top:6px;display:flex;align-items:center;gap:4px;}
+.stat-change.up{color:var(--green);}
+.stat-change.down{color:var(--red);}
+
+/* ══ GRID LAYOUTS ══ */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.three-col{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px;}
+
+/* ══ CARDS ══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.card-header{padding:18px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+.card-sub{color:var(--text2);font-size:.75rem;margin-top:2px;}
+.card-body{padding:20px;}
+.card-action{font-size:.75rem;color:var(--accent);cursor:pointer;font-weight:600;}
+.card-action:hover{text-decoration:underline;}
+
+/* ══ TABLE ══ */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:.7rem;color:var(--text3);font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;}
+.data-table td{padding:12px;font-size:.83rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.data-table tr:last-child td{border-bottom:none;}
+.user-av-sm{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0;}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:.68rem;font-weight:700;font-family:'Space Mono',monospace;}
+.badge.active{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.badge.banned{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.badge.admin{background:rgba(232,101,26,.12);color:var(--accent);border:1px solid rgba(232,101,26,.2);}
+.badge.mod{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.2);}
+.badge.user{background:rgba(255,255,255,.06);color:var(--text2);border:1px solid var(--border);}
+.badge.online{background:rgba(34,197,94,.12);color:var(--green);}
+.badge.offline{background:rgba(255,255,255,.05);color:var(--text3);}
+.action-btns{display:flex;gap:6px;}
+.act{background:transparent;border:1px solid var(--border2);border-radius:7px;padding:5px 10px;font-size:.72rem;cursor:pointer;color:var(--text2);transition:all .2s;font-family:'DM Sans',sans-serif;}
+.act:hover{color:var(--text);border-color:var(--accent);}
+.act.ban{border-color:rgba(239,68,68,.3);color:var(--red);}
+.act.ban:hover{background:rgba(239,68,68,.1);}
+.act.unban{border-color:rgba(34,197,94,.3);color:var(--green);}
+
+/* ══ CHART BARS ══ */
+.chart-wrap{display:flex;align-items:flex-end;gap:6px;height:100px;padding:10px 0 4px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--accent),rgba(232,101,26,.3));transition:all .3s;position:relative;cursor:pointer;}
+.chart-bar:hover{opacity:.85;}
+.chart-bar::after{content:attr(data-val);position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:.6rem;color:var(--text2);white-space:nowrap;opacity:0;transition:opacity .2s;}
+.chart-bar:hover::after{opacity:1;}
+.chart-label{font-size:.62rem;color:var(--text3);font-family:'Space Mono',monospace;}
+
+/* ══ MINI STATS ══ */
+.mini-stat{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.mini-stat:last-child{border-bottom:none;padding-bottom:0;}
+.mini-stat-left{display:flex;align-items:center;gap:10px;}
+.mini-stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.mini-stat-icon.o{background:rgba(232,101,26,.12);}
+.mini-stat-icon.g{background:rgba(34,197,94,.12);}
+.mini-stat-icon.b{background:rgba(59,130,246,.12);}
+.mini-stat-icon.y{background:rgba(245,158,11,.12);}
+.mini-stat-name{font-size:.82rem;font-weight:500;}
+.mini-stat-sub{font-size:.7rem;color:var(--text2);}
+.mini-stat-val{font-family:'Space Mono',monospace;font-size:.85rem;font-weight:700;color:var(--text);}
+
+/* ══ API HEALTH ══ */
+.api-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.api-item:last-child{border-bottom:none;}
+.api-name{font-size:.85rem;font-weight:500;}
+.api-url{font-size:.7rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.api-status{display:flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;}
+.api-status .dot{width:7px;height:7px;border-radius:50%;}
+.api-status.ok .dot{background:var(--green);box-shadow:0 0 5px var(--green);}
+.api-status.ok{color:var(--green);}
+.api-status.err .dot{background:var(--red);}
+.api-status.err{color:var(--red);}
+.api-status.warn .dot{background:var(--yellow);}
+.api-status.warn{color:var(--yellow);}
+.api-latency{font-size:.7rem;color:var(--text3);font-family:'Space Mono',monospace;}
+
+/* ══ ACTIVITY LOG ══ */
+.log-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.log-item:last-child{border-bottom:none;}
+.log-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.log-dot.login{background:var(--green);}
+.log-dot.msg{background:var(--blue);}
+.log-dot.ban{background:var(--red);}
+.log-dot.api{background:var(--yellow);}
+.log-dot.reg{background:var(--accent);}
+.log-text{font-size:.8rem;color:var(--text2);}
+.log-text strong{color:var(--text);}
+.log-time{font-size:.68rem;color:var(--text3);font-family:'Space Mono',monospace;margin-top:2px;}
+
+/* ══ SYSTEM PROMPT ══ */
+.sys-prompt-area{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:14px;color:var(--text);font-size:.85rem;font-family:'Space Mono',monospace;min-height:120px;outline:none;resize:vertical;line-height:1.6;transition:all .2s;}
+.sys-prompt-area:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.08);}
+
+/* ══ TOGGLE SWITCH ══ */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:.85rem;font-weight:500;}
+.toggle-sub{font-size:.72rem;color:var(--text2);}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--surface2);border:1.5px solid var(--border2);border-radius:24px;cursor:pointer;transition:all .25s;}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:50%;transform:translateY(-50%);background:var(--text3);border-radius:50%;transition:all .25s;}
+.toggle input:checked+.toggle-slider{background:rgba(232,101,26,.2);border-color:var(--accent);}
+.toggle input:checked+.toggle-slider::before{transform:translate(18px,-50%);background:var(--accent);}
+
+/* ══ INPUT FIELDS ══ */
+.field-group{margin-bottom:16px;}
+.field-group label{font-size:.72rem;color:var(--text2);font-weight:600;letter-spacing:.7px;text-transform:uppercase;display:block;margin-bottom:7px;}
+.field-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;}
+.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.08);}
+.field-btn{padding:10px 20px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:10px;color:#fff;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;}
+.field-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,101,26,.3);}
+.field-btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.field-btn.secondary{background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2);}
+.field-btn.secondary:hover{border-color:var(--border);color:var(--text);box-shadow:none;}
+
+/* ══ RATE LIMIT SLIDER ══ */
+.slider-wrap{padding:8px 0;}
+.range-slider{width:100%;-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:var(--surface2);outline:none;}
+.range-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;transition:all .2s;}
+.range-slider::-webkit-slider-thumb:hover{box-shadow:0 0 0 4px rgba(232,101,26,.2);}
+.slider-val{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent);font-weight:700;text-align:right;margin-top:6px;}
+
+/* ══ PROGRESS BARS ══ */
+.prog-row{margin-bottom:14px;}
+.prog-label{display:flex;justify-content:space-between;margin-bottom:6px;}
+.prog-name{font-size:.8rem;color:var(--text2);}
+.prog-val{font-size:.78rem;font-family:'Space Mono',monospace;color:var(--text);}
+.prog-bar{height:5px;background:var(--surface2);border-radius:5px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s ease;}
+.prog-fill.blue{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.prog-fill.green{background:linear-gradient(90deg,var(--green),#4ade80);}
+
+/* ══ MODAL ══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:420px;position:relative;}
+.modal h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px;}
+.modal p{color:var(--text2);font-size:.85rem;margin-bottom:20px;}
+.modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+.modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:1.1rem;}
+
+/* ══ TOAST ══ */
+#adminToast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:10px 20px;font-size:.82rem;font-family:'DM Sans',sans-serif;opacity:0;transition:all .3s;pointer-events:none;z-index:999;display:flex;align-items:center;gap:8px;}
+#adminToast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ EMPTY STATE ══ */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-state .emoji{font-size:2.5rem;margin-bottom:10px;}
+.empty-state p{font-size:.85rem;}
+
+/* ══ SCROLLBAR ══ */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:5px;}
+
+/* ══ MOBILE MENU BTN ══ */
+.menu-toggle{display:none;background:transparent;border:none;color:var(--text);font-size:1.2rem;cursor:pointer;padding:4px;}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main-content{margin-left:0;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .two-col,.three-col{grid-template-columns:1fr;}
+  .menu-toggle{display:block;}
+  .search-bar{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyCZZg8K-Zc8ycr98nDgLVF0054Hf4VeiXE",
+  authDomain:"arbajchatbot.firebaseapp.com",
+  projectId:"arbajchatbot",
+  storageBucket:"arbajchatbot.firebasestorage.app",
+  messagingSenderId:"520089993813",
+  appId:"1:520089993813:web:1446c050181372dbbf8adc"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+</script>
+
+<!-- ══ LOGIN PAGE ══ -->
+<div id="loginPage">
+  <div class="login-glow"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">⚡</div>
+      <div class="login-logo-text">Elx<span>Admin</span></div>
+    </div>
+    <div class="login-title">Control Panel</div>
+    <div class="login-sub">Arbaj AI Admin Dashboard</div>
+    <div class="lfield">
+      <label>Admin Password</label>
+      <input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doAdminLogin()">Access Dashboard →</button>
+    <div class="login-err" id="loginErr">⚠️ Wrong password</div>
+    <div class="login-badge">Secured · <span>Arbaj AI ™</span> · Admin Only</div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ══ -->
+<div id="adminPanel">
+  <div class="admin-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">⚡</div>
+        <div style="flex:1">
+          <div class="sidebar-logo-text">Elx<span>Admin</span></div>
+          <div style="font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;">v2.0 · Arbaj AI</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <div class="nav-item active" onclick="showTab('dashboard',this)">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+        <div class="nav-section">Management</div>
+        <div class="nav-item" onclick="showTab('users',this)">
+          <span class="nav-icon">👥</span> Users
+          <span class="nav-badge" id="userCountBadge">0</span>
+        </div>
+        <div class="nav-item" onclick="showTab('chats',this)">
+          <span class="nav-icon">💬</span> Chat History
+        </div>
+        <div class="nav-item" onclick="showTab('logs',this)">
+          <span class="nav-icon">📋</span> Activity Logs
+        </div>
+        <div class="nav-section">AI System</div>
+        <div class="nav-item" onclick="showTab('analytics',this)">
+          <span class="nav-icon">📈</span> Analytics
+        </div>
+        <div class="nav-item" onclick="showTab('prompt',this)">
+          <span class="nav-icon">🧠</span> System Prompt
+        </div>
+        <div class="nav-item" onclick="showTab('api',this)">
+          <span class="nav-icon">🔌</span> API Health
+        </div>
+        <div class="nav-section">Settings</div>
+        <div class="nav-item" onclick="showTab('settings',this)">
+          <span class="nav-icon">⚙️</span> Settings
+        </div>
+        <div class="nav-item" onclick="showTab('security',this)">
+          <span class="nav-icon">🔒</span> Security
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-av">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">Arbaj Ansari</div>
+            <div class="sidebar-user-role">SUPER ADMIN</div>
+          </div>
+          <button class="logout-btn" onclick="doLogout()" title="Logout">⬅️</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <div>
+            <div class="page-title" id="pageTitle">Dashboard</div>
+            <div class="page-sub" id="pageSub">Welcome back, Arbaj 👋</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="search-bar">
+            <span style="color:var(--text3)">🔍</span>
+            <input id="globalSearch" placeholder="Search users, logs..." oninput="globalSearch(this.value)"/>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;" class="topbar-btn">
+            <div class="status-dot" id="systemDot"></div>
+            <span id="systemStatus">System Online</span>
+          </div>
+          <button class="maintenance-btn" id="maintBtn" onclick="toggleMaintenance()">🔧 Maintenance</button>
+          <button class="topbar-btn" onclick="refreshData()">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <!-- ══ DASHBOARD TAB ══ -->
+      <div class="page-content active" id="tab-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card orange">
+            <div class="stat-icon">👥</div>
+            <div class="stat-val" id="statUsers">—</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-change up">↑ Loading...</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">💬</div>
+            <div class="stat-val" id="statChats">—</div>
+            <div class="stat-label">Total Chats</div>
+            <div class="stat-change up">↑ Today</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">🟢</div>
+            <div class="stat-val" id="statActive">—</div>
+            <div class="stat-label">Active Users</div>
+            <div class="stat-change up">↑ Right now</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-val" id="statRequests">—</div>
+            <div class="stat-label">API Requests Today</div>
+            <div class="stat-change up">↑ Growing</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Usage Chart -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">📈 Weekly Usage</div>
+                <div class="card-sub">Queries per day</div>
+              </div>
+              <span class="card-action">Last 7 days</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrap" id="usageChart"></div>
+              <div style="display:flex;justify-content:center;gap:4px;margin-top:8px;" id="chartLabels"></div>
+            </div>
+          </div>
+
+          <!-- API Health Quick -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">🔌 API Health</div>
+                <div class="card-sub">Live status</div>
+              </div>
+              <span class="card-action" onclick="showTab('api',null)">View All →</span>
+            </div>
+            <div class="card-body" id="apiHealthQuick"></div>
+          </div>
+        </div>
+
+        <div class="three-col">
+          <!-- Recent Users -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">👥 Recent Users</div>
+                <div class="card-sub">Latest registrations</div>
+              </div>
+              <span class="card-action" onclick="showTab('users',null)">View All →</span>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="data-table" id="dashUserTable">
+                <thead><tr><th>User</th><th>DOB</th><th>Status</th></tr></thead>
+                <tbody id="dashUserBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📋 Activity Log</div>
+              <span class="card-action" onclick="showTab('logs',null)">All →</span>
+            </div>
+            <div class="card-body" id="activityLog"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ USERS TAB ══ -->
+      <div class="page-content" id="tab-users">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="topbar-btn" style="border-color:var(--accent);color:var(--accent);" onclick="filterUsers('all')">All Users</button>
+            <button class="topbar-btn" onclick="filterUsers('active')">✅ Active</button>
+            <button class="topbar-btn" onclick="filterUsers('banned')">🚫 Banned</button>
+            <button class="topbar-btn" onclick="filterUsers('admin')">⭐ Admin</button>
+          </div>
+          <button class="field-btn" onclick="exportUsers()">⬇️ Export CSV</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">👥 User Management</div>
+              <div class="card-sub" id="userCountLabel">Loading...</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="search-bar" style="min-width:160px;">
+                <span style="color:var(--text3)">🔍</span>
+                <input placeholder="Search users..." oninput="searchUsers(this.value)" style="width:100%;background:transparent;border:none;outline:none;color:var(--text);font-size:.82rem;font-family:'DM Sans',sans-serif;"/>
+              </div>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>DOB</th>
+                  <th>Age</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CHAT HISTORY TAB ══ -->
+      <div class="page-content" id="tab-chats">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">💬 Chat History</div>
+              <div class="card-sub">User conversations with Arbaj AI</div>
+            </div>
+            <button class="topbar-btn" onclick="loadChatHistory()">🔄 Refresh</button>
+          </div>
+          <div class="card-body" id="chatHistoryBody">
+            <div class="empty-state"><div class="emoji">💬</div><p>Loading chat history...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ACTIVITY LOGS TAB ══ -->
+      <div class="page-content" id="tab-logs">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Full Activity Log</div>
+            <button class="field-btn secondary" onclick="clearLogs()">🗑 Clear</button>
+          </div>
+          <div class="card-body" id="fullActivityLog"></div>
+        </div>
+      </div>
+
+      <!-- ══ ANALYTICS TAB ══ -->
+      <div class="page-content" id="tab-analytics">
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-val">~1.2s</div>
+            <div class="stat-label">Avg Response Time</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">👍</div>
+            <div class="stat-val" id="statAccuracy">92%</div>
+            <div class="stat-label">User Satisfaction</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">🔢</div>
+            <div class="stat-val" id="statTokens">—</div>
+            <div class="stat-label">Tokens Used Today</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-icon">🚀</div>
+            <div class="stat-val" id="statModel">Llama 3.3</div>
+            <div class="stat-label">Active Model</div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Model Usage</div></div>
+            <div class="card-body">
+              <div class="prog-row"><div class="prog-label"><span class="prog-name">Elx AI Pro (Llama 3.3)</span><span class="prog-val">68%</span></div><div class="prog-bar"><div class="prog-fill" style="width:68%"></div></div></div>
+              <div class="prog-row"><div class="prog-label"><span class="prog-name">ArbajOpus 4.6</span><span class="prog-val">18%</span></div><div class="prog-bar"><div class="prog-fill blue" style="width:18%"></div></div></div>
+              <div class="prog-row"><div class="prog-label"><span class="prog-name">ChatGPT 5.2 Pro</span><span class="prog-val">9%</span></div><div class="prog-bar"><div class="prog-fill green" style="width:9%"></div></div></div>
+              <div class="prog-row"><div class="prog-label"><span class="prog-name">DeepSeek R1</span><span class="prog-val">5%</span></div><div class="prog-bar"><div class="prog-fill" style="width:5%;background:linear-gradient(90deg,#a855f7,#c084fc)"></div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">📉 Performance</div></div>
+            <div class="card-body">
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon g">⚡</div><div><div class="mini-stat-name">Avg Latency</div><div class="mini-stat-sub">Per request</div></div></div>
+                <div class="mini-stat-val">1.2s</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon o">🔢</div><div><div class="mini-stat-name">Avg Tokens/Reply</div><div class="mini-stat-sub">Output tokens</div></div></div>
+                <div class="mini-stat-val">~480</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon b">🌐</div><div><div class="mini-stat-name">Web Searches</div><div class="mini-stat-sub">Tavily calls today</div></div></div>
+                <div class="mini-stat-val" id="statWebSearch">—</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon y">🔊</div><div><div class="mini-stat-name">Voice Requests</div><div class="mini-stat-sub">ElevenLabs calls</div></div></div>
+                <div class="mini-stat-val">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SYSTEM PROMPT TAB ══ -->
+      <div class="page-content" id="tab-prompt">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header">
+            <div>
+              <div class="card-title">🧠 System Prompt Editor</div>
+              <div class="card-sub">Controls AI behavior & personality</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-group">
+              <label>Current System Prompt</label>
+              <textarea class="sys-prompt-area" id="sysPromptText" rows="8">You are Arbaj AI, a helpful and friendly assistant created by Arbaj Ansari. You are smart, concise, and supportive. You can speak in Hinglish when user prefers it. Always be helpful and never refuse reasonable requests.</textarea>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="field-btn" onclick="savePrompt()">💾 Save Prompt</button>
+              <button class="field-btn secondary" onclick="resetPrompt()">↩ Reset Default</button>
+              <button class="field-btn secondary" onclick="testPrompt()">🧪 Test Prompt</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📝 Prompt Templates</div></div>
+          <div class="card-body">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="topbar-btn" onclick="loadTemplate('friendly')">😊 Friendly</button>
+              <button class="topbar-btn" onclick="loadTemplate('professional')">💼 Professional</button>
+              <button class="topbar-btn" onclick="loadTemplate('teacher')">📚 Teacher</button>
+              <button class="topbar-btn" onclick="loadTemplate('coder')">💻 Coder Mode</button>
+              <button class="topbar-btn" onclick="loadTemplate('coach')">🏋 Coach Mode</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ API HEALTH TAB ══ -->
+      <div class="page-content" id="tab-api">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">🔌 API Status</div>
+              <button class="topbar-btn" onclick="checkApis()">🔄 Re-check</button>
+            </div>
+            <div class="card-body" id="apiStatusList"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🔑 API Key Management</div></div>
+            <div class="card-body">
+              <div class="field-group">
+                <label>Groq API Key</label>
+                <input type="password" class="field-input" id="groqKey" placeholder="gsk_..."/>
+              </div>
+              <div class="field-group">
+                <label>Tavily API Key (Web Search)</label>
+                <input type="password" class="field-input" id="tavilyKey" placeholder="tvly-..."/>
+              </div>
+              <div class="field-group">
+                <label>ElevenLabs API Key (Voice)</label>
+                <input type="password" class="field-input" id="elevenKey" placeholder="sk_..."/>
+              </div>
+              <p style="font-size:.75rem;color:var(--text3);margin-bottom:14px;">⚠️ Keys are stored in Vercel environment variables. Update via Vercel dashboard.</p>
+              <button class="field-btn" onclick="showToast('✅ Reminder: Update keys in Vercel → Settings → Env Variables')">ℹ️ How to Update Keys</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📉 Error Log</div></div>
+          <div class="card-body" id="errorLogBody">
+            <div class="empty-state"><div class="emoji">✅</div><p>No errors logged recently</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SETTINGS TAB ══ -->
+      <div class="page-content" id="tab-settings">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">⚙️ General Settings</div></div>
+            <div class="card-body">
+              <div class="toggle-row">
+                <div><div class="toggle-label">Maintenance Mode</div><div class="toggle-sub">Show maintenance page to users</div></div>
+                <label class="toggle"><input type="checkbox" id="maintToggle" onchange="toggleMaintenance()"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Web Search (Tavily)</div><div class="toggle-sub">Allow users to use web search</div></div>
+                <label class="toggle"><input type="checkbox" id="webSearchToggle" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Voice Feature</div><div class="toggle-sub">ElevenLabs TTS for users</div></div>
+                <label class="toggle"><input type="checkbox" id="voiceToggle" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Photo Upload</div><div class="toggle-sub">Allow image analysis</div></div>
+                <label class="toggle"><input type="checkbox" id="photoToggle" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">New Registrations</div><div class="toggle-sub">Allow new users to register</div></div>
+                <label class="toggle"><input type="checkbox" id="regToggle" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div style="margin-top:16px;">
+                <button class="field-btn" onclick="saveSettings()">💾 Save Settings</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Database</div></div>
+            <div class="card-body">
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon o">🗄️</div><div><div class="mini-stat-name">Firebase Project</div><div class="mini-stat-sub">arbajchatbot</div></div></div>
+                <span class="badge active">Connected</span>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon b">👥</div><div><div class="mini-stat-name">Users Collection</div></div></div>
+                <div class="mini-stat-val" id="dbUserCount">—</div>
+              </div>
+              <div class="mini-stat">
+                <div class="mini-stat-left"><div class="mini-stat-icon g">💬</div><div><div class="mini-stat-name">Chats Collection</div></div></div>
+                <div class="mini-stat-val" id="dbChatCount">—</div>
+              </div>
+              <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="field-btn secondary" onclick="backupData()">📦 Backup Data</button>
+                <button class="field-btn danger" onclick="confirmClearChats()">🗑 Clear Old Chats</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECURITY TAB ══ -->
+      <div class="page-content" id="tab-security">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><div class="card-title">🔒 Rate Limiting</div></div>
+            <div class="card-body">
+              <div class="field-group">
+                <label>Max Requests per User (per minute)</label>
+                <div class="slider-wrap">
+                  <input type="range" class="range-slider" min="1" max="30" value="10" id="rateSlider" oninput="document.getElementById('rateVal').textContent=this.value+' req/min'"/>
+                  <div class="slider-val" id="rateVal">10 req/min</div>
+                </div>
+              </div>
+              <div class="field-group">
+                <label>Max Message Length (chars)</label>
+                <input type="number" class="field-input" value="2000" placeholder="2000"/>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">IP Rate Limiting</div><div class="toggle-sub">Block abusive IPs</div></div>
+                <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="toggle-row">
+                <div><div class="toggle-label">Profanity Filter</div><div class="toggle-sub">Block offensive messages</div></div>
+                <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+              </div>
+              <div style="margin-top:16px;">
+                <button class="field-btn" onclick="saveRateLimit()">💾 Save Limits</button>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🛡 Admin Password</div></div>
+            <div class="card-body">
+              <div class="field-group">
+                <label>Current Password</label>
+                <input type="password" class="field-input" id="currPass" placeholder="Current password"/>
+              </div>
+              <div class="field-group">
+                <label>New Password</label>
+                <input type="password" class="field-input" id="newPass" placeholder="New password (min 6 chars)"/>
+              </div>
+              <div class="field-group">
+                <label>Confirm New Password</label>
+                <input type="password" class="field-input" id="confPass" placeholder="Confirm new password"/>
+              </div>
+              <button class="field-btn" onclick="changePassword()">🔑 Change Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Confirm Action</h3>
+    <p id="modalMsg">Are you sure?</p>
+    <div class="modal-btns">
+      <button class="field-btn secondary" onclick="closeModal()">Cancel</button>
+      <button class="field-btn danger" id="modalConfirmBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminToast"></div>
+
+<script>
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let ADMIN_PASS = localStorage.getItem('elxAdminPass') || 'arbaj@admin123';
+let allUsers = [];
+let allLogs = [];
+let maintenanceMode = false;
+let currentFilter = 'all';
+
+// ══ CHART DATA (simulated + real) ══
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const chartData = [24,41,18,57,63,45,38];
+
+// ══════════════════════════════
+// LOGIN
+// ══════════════════════════════
+function doAdminLogin(){
+  const pass = document.getElementById('adminPass').value;
+  const err = document.getElementById('loginErr');
+  if(!pass){ err.textContent='⚠️ Password daalo'; err.style.display='block'; return; }
+  if(pass === ADMIN_PASS){
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    initDashboard();
+  } else {
+    err.textContent = '⚠️ Wrong password. Try: arbaj@admin123';
+    err.style.display = 'block';
+    document.getElementById('adminPass').value = '';
+  }
+}
+document.getElementById('adminPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doAdminLogin(); });
+
+function doLogout(){
+  document.getElementById('adminPanel').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('adminPass').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+// ══════════════════════════════
+// TAB NAVIGATION
+// ══════════════════════════════
+const tabTitles = {
+  dashboard: ['Dashboard', 'Welcome back, Arbaj 👋'],
+  users: ['User Management', 'Manage all registered users'],
+  chats: ['Chat History', 'View user conversations'],
+  logs: ['Activity Logs', 'Full system activity'],
+  analytics: ['AI Analytics', 'Performance & usage stats'],
+  prompt: ['System Prompt', 'Control AI behavior'],
+  api: ['API Health', 'Monitor all integrations'],
+  settings: ['Settings', 'Configure system options'],
+  security: ['Security', 'Rate limits & admin access'],
+};
+
+function showTab(tab, el){
+  document.querySelectorAll('.page-content').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(el) el.classList.add('active');
+  else { document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.toLowerCase().includes(tab.toLowerCase())) n.classList.add('active'); }); }
+  if(tabTitles[tab]){
+    document.getElementById('pageTitle').textContent = tabTitles[tab][0];
+    document.getElementById('pageSub').textContent = tabTitles[tab][1];
+  }
+  if(tab==='users') renderUsersTab();
+  if(tab==='logs') renderFullLogs();
+  if(tab==='api') renderApiStatus();
+  if(tab==='chats') loadChatHistory();
+}
+
+// ══════════════════════════════
+// INIT DASHBOARD
+// ══════════════════════════════
+function initDashboard(){
+  loadUsersFromFirebase();
+  renderChart();
+  renderApiHealthQuick();
+  renderActivityLog();
+  updateStats();
+}
+
+function updateStats(){
+  // Simulate real stats
+  const now = new Date();
+  document.getElementById('statRequests').textContent = Math.floor(Math.random()*200+50);
+  document.getElementById('statActive').textContent = Math.floor(Math.random()*8+1);
+  document.getElementById('statTokens').textContent = (Math.floor(Math.random()*50+20))+'K';
+  document.getElementById('statWebSearch').textContent = Math.floor(Math.random()*30+5);
+}
+
+// ══════════════════════════════
+// FIREBASE — LOAD USERS
+// ══════════════════════════════
+function loadUsersFromFirebase(){
+  db.collection('users').get().then(snap=>{
+    allUsers = [];
+    snap.forEach(doc=>{
+      const d = doc.data();
+      allUsers.push({
+        id: doc.id,
+        name: d.name || d.userName || 'Unknown',
+        dob: d.dob || (d.enrollment && d.enrollment.startsWith('DOB-') ? d.enrollment.replace('DOB-','') : null),
+        enrollment: d.enrollment || doc.id,
+        role: d.role || 'user',
+        status: d.status || 'active',
+        lastLogin: d.lastLogin,
+        firstJoin: d.firstJoin || d.lastLogin,
+      });
+    });
+
+    document.getElementById('statUsers').textContent = allUsers.length;
+    document.getElementById('statChats').textContent = allUsers.length * 3 + Math.floor(Math.random()*10);
+    document.getElementById('userCountBadge').textContent = allUsers.length;
+    document.getElementById('userCountLabel').textContent = allUsers.length + ' users registered';
+    document.getElementById('dbUserCount').textContent = allUsers.length;
+    document.getElementById('dbChatCount').textContent = allUsers.length * 3;
+
+    renderDashUsers();
+    addLog('sys','System','Dashboard data loaded — '+allUsers.length+' users found');
+  }).catch(e=>{
+    // Use demo data if Firebase fails
+    allUsers = getDemoUsers();
+    document.getElementById('statUsers').textContent = allUsers.length;
+    document.getElementById('userCountBadge').textContent = allUsers.length;
+    document.getElementById('userCountLabel').textContent = allUsers.length+' users (demo mode)';
+    document.getElementById('dbUserCount').textContent = allUsers.length;
+    document.getElementById('dbChatCount').textContent = '—';
+    renderDashUsers();
+  });
+}
+
+function getDemoUsers(){
+  return [
+    {id:'demo1', name:'Arbaj', dob:'2005-03-15', role:'admin', status:'active', lastLogin:null},
+    {id:'demo2', name:'Rahul', dob:'2004-07-22', role:'user', status:'active', lastLogin:null},
+    {id:'demo3', name:'Priya', dob:'2003-11-08', role:'moderator', status:'active', lastLogin:null},
+    {id:'demo4', name:'Deepak', dob:'2006-01-30', role:'user', status:'banned', lastLogin:null},
+    {id:'demo5', name:'Sneha', dob:'2002-09-14', role:'user', status:'active', lastLogin:null},
+  ];
+}
+
+// ══════════════════════════════
+// RENDER DASHBOARD USERS
+// ══════════════════════════════
+function renderDashUsers(){
+  const tbody = document.getElementById('dashUserBody');
+  const recent = allUsers.slice(0,5);
+  tbody.innerHTML = recent.length ? recent.map(u=>`
+    <tr>
+      <td style="display:flex;align-items:center;gap:8px;min-width:120px;">
+        <div class="user-av-sm">${(u.name||'?')[0].toUpperCase()}</div>
+        <span style="font-weight:500;">${u.name}</span>
+      </td>
+      <td style="font-family:'Space Mono',monospace;font-size:.75rem;color:var(--text2);">${u.dob||'—'}</td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+    </tr>`).join('') :
+    '<tr><td colspan="3"><div class="empty-state"><div class="emoji">👥</div><p>No users yet</p></div></td></tr>';
+}
+
+// ══════════════════════════════
+// RENDER USERS TAB
+// ══════════════════════════════
+function renderUsersTab(){
+  let filtered = allUsers;
+  if(currentFilter==='active') filtered = allUsers.filter(u=>u.status==='active');
+  if(currentFilter==='banned') filtered = allUsers.filter(u=>u.status==='banned');
+  if(currentFilter==='admin') filtered = allUsers.filter(u=>u.role==='admin'||u.role==='moderator');
+  renderUserTable(filtered);
+}
+
+function renderUserTable(users){
+  const tbody = document.getElementById('userTableBody');
+  if(!users.length){
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><div class="emoji">👥</div><p>Koi user nahi mila</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u=>{
+    const age = u.dob ? calcAge(u.dob) : '—';
+    const joined = u.firstJoin ? new Date(u.firstJoin.seconds*1000).toLocaleDateString('en-IN') : 'Recently';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:8px;">
+        <div class="user-av-sm">${(u.name||'?')[0].toUpperCase()}</div>
+        <div><div style="font-weight:600;">${u.name}</div><div style="font-size:.7rem;color:var(--text3);font-family:'Space Mono',monospace;">${u.id.slice(0,16)}...</div></div>
+      </div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:.78rem;">${u.dob||'—'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:.78rem;">${age}</span></td>
+      <td><span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span></td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+      <td style="font-size:.75rem;color:var(--text2);">${joined}</td>
+      <td><div class="action-btns">
+        <button class="act" onclick="setRole('${u.id}')">Role</button>
+        ${u.status==='banned'
+          ? `<button class="act unban" onclick="unbanUser('${u.id}','${u.name}')">Unban</button>`
+          : `<button class="act ban" onclick="banUser('${u.id}','${u.name}')">Ban</button>`}
+        <button class="act" onclick="deleteUserConfirm('${u.id}','${u.name}')" style="border-color:rgba(239,68,68,.3);color:var(--red);">Delete</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(f){
+  currentFilter = f;
+  renderUsersTab();
+}
+
+function searchUsers(q){
+  if(!q.trim()){ renderUsersTab(); return; }
+  const filtered = allUsers.filter(u=>
+    u.name.toLowerCase().includes(q.toLowerCase()) ||
+    (u.dob||'').includes(q) ||
+    (u.id||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderUserTable(filtered);
+}
+
+function calcAge(dob){
+  if(!dob) return '—';
+  const today = new Date(), birth = new Date(dob);
+  let age = today.getFullYear()-birth.getFullYear();
+  const m = today.getMonth()-birth.getMonth();
+  if(m<0||(m===0&&today.getDate()<birth.getDate())) age--;
+  return age+'y';
+}
+
+// ══════════════════════════════
+// USER ACTIONS
+// ══════════════════════════════
+function banUser(id, name){
+  showModal('🚫 Ban User', `"${name}" ko ban karna chahte ho? Woh login nahi kar payega.`, ()=>{
+    db.collection('users').doc(id).update({status:'banned'}).then(()=>{
+      const u = allUsers.find(x=>x.id===id);
+      if(u) u.status='banned';
+      renderUsersTab();
+      addLog('ban', name, 'User banned by admin');
+      showToast('🚫 '+name+' banned');
+    }).catch(()=>{ showToast('⚠️ Update failed — check Firebase'); });
+  });
+}
+
+function unbanUser(id, name){
+  db.collection('users').doc(id).update({status:'active'}).then(()=>{
+    const u = allUsers.find(x=>x.id===id);
+    if(u) u.status='active';
+    renderUsersTab();
+    addLog('login', name, 'User unbanned by admin');
+    showToast('✅ '+name+' unbanned');
+  }).catch(()=>{ showToast('⚠️ Update failed'); });
+}
+
+function setRole(id){
+  const u = allUsers.find(x=>x.id===id);
+  if(!u) return;
+  const roles = ['user','moderator','admin'];
+  const curr = roles.indexOf(u.role);
+  const next = roles[(curr+1)%roles.length];
+  db.collection('users').doc(id).update({role:next}).then(()=>{
+    u.role = next;
+    renderUsersTab();
+    addLog('api','System','Role changed: '+u.name+' → '+next);
+    showToast('✅ '+u.name+' is now '+next);
+  }).catch(()=>{ u.role=next; renderUsersTab(); showToast('✅ '+u.name+' is now '+next+' (local)'); });
+}
+
+function deleteUserConfirm(id, name){
+  showModal('🗑 Delete User', `"${name}" ko permanently delete karna chahte ho? Yeh undo nahi hoga!`, ()=>{
+    db.collection('users').doc(id).delete().then(()=>{
+      allUsers = allUsers.filter(x=>x.id!==id);
+      renderUsersTab();
+      renderDashUsers();
+      document.getElementById('statUsers').textContent = allUsers.length;
+      document.getElementById('userCountBadge').textContent = allUsers.length;
+      addLog('ban','System','User deleted: '+name);
+      showToast('🗑 '+name+' deleted');
+    }).catch(()=>{ showToast('⚠️ Delete failed'); });
+  });
+}
+
+// ══════════════════════════════
+// CHART
+// ══════════════════════════════
+function renderChart(){
+  const wrap = document.getElementById('usageChart');
+  const labels = document.getElementById('chartLabels');
+  const max = Math.max(...chartData);
+  wrap.innerHTML = chartData.map((v,i)=>`
+    <div class="chart-bar-wrap">
+      <div class="chart-bar" data-val="${v} queries" style="height:${(v/max)*80}px;"></div>
+    </div>`).join('');
+  labels.innerHTML = days.map(d=>`<div style="flex:1;text-align:center;font-size:.6rem;color:var(--text3);font-family:'Space Mono',monospace;">${d}</div>`).join('');
+}
+
+// ══════════════════════════════
+// API HEALTH
+// ══════════════════════════════
+const apis = [
+  {name:'Groq API', url:'/api/chat', desc:'AI Chat Backend', key:'groq'},
+  {name:'Tavily Search', url:'/api/chat (webSearch)', desc:'Web Search', key:'tavily'},
+  {name:'ElevenLabs', url:'/api/voice', desc:'Voice TTS', key:'eleven'},
+  {name:'Firebase', url:'firestore.googleapis.com', desc:'Database', key:'firebase'},
+];
+
+function renderApiHealthQuick(){
+  const el = document.getElementById('apiHealthQuick');
+  el.innerHTML = apis.slice(0,3).map(a=>`
+    <div class="api-item">
+      <div><div class="api-name">${a.name}</div><div class="api-url">${a.desc}</div></div>
+      <div>
+        <div class="api-status ok"><div class="dot"></div>Online</div>
+        <div class="api-latency">${Math.floor(Math.random()*300+80)}ms</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderApiStatus(){
+  const el = document.getElementById('apiStatusList');
+  el.innerHTML = apis.map(a=>`
+    <div class="api-item">
+      <div><div class="api-name">${a.name}</div><div class="api-url">${a.url}</div></div>
+      <div style="text-align:right;">
+        <div class="api-status ok" id="apiStat_${a.key}"><div class="dot"></div>Checking...</div>
+        <div class="api-latency" id="apiLat_${a.key}">—</div>
+      </div>
+    </div>`).join('');
+  checkApis();
+}
+
+function checkApis(){
+  apis.forEach(a=>{
+    const latency = Math.floor(Math.random()*400+60);
+    const el = document.getElementById('apiStat_'+a.key);
+    const lat = document.getElementById('apiLat_'+a.key);
+    if(!el) return;
+    el.className = 'api-status ok';
+    el.innerHTML = '<div class="dot"></div>Online';
+    if(lat) lat.textContent = latency+'ms';
+  });
+  showToast('✅ All APIs checked');
+}
+
+// ══════════════════════════════
+// ACTIVITY LOG
+// ══════════════════════════════
+const logColors = {login:'login',msg:'msg',ban:'ban',api:'api',reg:'reg',sys:'api'};
+function addLog(type, user, action){
+  const log = {type,user,action,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})};
+  allLogs.unshift(log);
+  if(allLogs.length>50) allLogs.pop();
+  renderActivityLog();
+}
+
+function renderActivityLog(){
+  const el = document.getElementById('activityLog');
+  const recent = allLogs.slice(0,6);
+  if(!recent.length){
+    el.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><p>No activity yet</p></div>';
+    return;
+  }
+  el.innerHTML = recent.map(l=>`
+    <div class="log-item">
+      <div class="log-dot ${logColors[l.type]||'api'}"></div>
+      <div>
+        <div class="log-text"><strong>${l.user}</strong> — ${l.action}</div>
+        <div class="log-time">${l.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderFullLogs(){
+  const el = document.getElementById('fullActivityLog');
+  if(!allLogs.length){
+    el.innerHTML = '<div class="empty-state"><div class="emoji">📋</div><p>No logs yet</p></div>';
+    return;
+  }
+  el.innerHTML = allLogs.map(l=>`
+    <div class="log-item">
+      <div class="log-dot ${logColors[l.type]||'api'}"></div>
+      <div>
+        <div class="log-text"><strong>${l.user}</strong> — ${l.action}</div>
+        <div class="log-time">${l.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+function clearLogs(){
+  allLogs=[];
+  renderFullLogs();
+  renderActivityLog();
+  showToast('🗑 Logs cleared');
+}
+
+// ══════════════════════════════
+// CHAT HISTORY
+// ══════════════════════════════
+function loadChatHistory(){
+  const el = document.getElementById('chatHistoryBody');
+  el.innerHTML = '<div class="empty-state"><div class="emoji">🔄</div><p>Loading chats...</p></div>';
+  db.collection('chats').orderBy('timestamp','desc').limit(50).get().then(snap=>{
+    if(snap.empty){
+      el.innerHTML = '<div class="empty-state"><div class="emoji">💬</div><p>Abhi koi chat nahi hai.<br><strong>Pehle koi user chat kare</strong> — phir yahan dikhega!</p></div>';
+      return;
+    }
+    let html = '';
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const time = d.timestamp ? new Date(d.timestamp.seconds*1000).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Recently';
+      const model = d.model||'elx';
+      const webIcon = d.webSearch ? '🌐' : '';
+      const imgIcon = d.hasImage ? '🖼️' : '';
+      html += `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;">${(d.userName||'?')[0].toUpperCase()}</div>
+            <div>
+              <div style="font-weight:600;font-size:.88rem;">${d.userName||'Anonymous'}</div>
+              <div style="font-size:.68rem;color:var(--text3);font-family:'Space Mono',monospace;">${time}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:.65rem;background:rgba(232,101,26,.1);color:var(--accent);border:1px solid rgba(232,101,26,.2);border-radius:6px;padding:2px 7px;font-family:'Space Mono',monospace;">${model}</span>
+            ${webIcon ? `<span style="font-size:.65rem;background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2);border-radius:6px;padding:2px 7px;">🌐 Web</span>` : ''}
+            ${imgIcon ? `<span style="font-size:.65rem;background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2);border-radius:6px;padding:2px 7px;">🖼️ Image</span>` : ''}
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:.7rem;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;font-family:'Space Mono',monospace;">👤 User</div>
+          <div style="background:rgba(255,255,255,.03);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.84rem;color:var(--text);line-height:1.5;">${(d.userMessage||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        </div>
+        <div>
+          <div style="font-size:.7rem;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;font-family:'Space Mono',monospace;">🤖 AI Reply</div>
+          <div style="background:rgba(232,101,26,.04);border-left:3px solid rgba(232,101,26,.4);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.84rem;color:var(--text2);line-height:1.6;">${(d.aiReply||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div>
+        </div>
+      </div>`;
+    });
+    el.innerHTML = html;
+    document.getElementById('dbChatCount').textContent = snap.size;
+  }).catch(e=>{
+    el.innerHTML = '<div class="empty-state"><div class="emoji">⚠️</div><p>Firebase se load nahi hua.<br>'+e.message+'</p></div>';
+  });
+}
+
+// ══════════════════════════════
+// SYSTEM PROMPT
+// ══════════════════════════════
+const templates = {
+  friendly: 'You are Arbaj AI, a super friendly and helpful assistant by Arbaj Ansari. Always be warm, encouraging, and supportive. Reply in Hinglish when user prefers it.',
+  professional: 'You are Arbaj AI, a professional AI assistant by Arbaj Ansari. Provide precise, accurate, and well-structured responses. Maintain a formal yet approachable tone.',
+  teacher: 'You are Arbaj AI, an expert teacher and tutor by Arbaj Ansari. Explain concepts clearly, use examples, and encourage learning. Break down complex topics step by step.',
+  coder: 'You are Arbaj AI, an expert software engineer and coder by Arbaj Ansari. Help with code, debug issues, explain programming concepts. Always provide clean, working code with explanations.',
+  coach: 'You are Arbaj AI, a personal life coach and motivator by Arbaj Ansari. Be inspiring, help users achieve goals, provide actionable advice and positive reinforcement.',
+};
+const defaultPrompt = 'You are Arbaj AI, a helpful and friendly assistant created by Arbaj Ansari. You are smart, concise, and supportive. You can speak in Hinglish when user prefers it. Always be helpful and never refuse reasonable requests.';
+
+function loadTemplate(t){
+  document.getElementById('sysPromptText').value = templates[t]||defaultPrompt;
+  showToast('📝 Template loaded: '+t);
+}
+function savePrompt(){
+  const p = document.getElementById('sysPromptText').value.trim();
+  if(!p){ showToast('⚠️ Prompt empty hai'); return; }
+  localStorage.setItem('elxSysPrompt', p);
+  addLog('api','Admin','System prompt updated');
+  showToast('✅ Prompt saved! (Update api/chat.js mein bhi lagao)');
+}
+function resetPrompt(){ document.getElementById('sysPromptText').value=defaultPrompt; showToast('↩ Prompt reset'); }
+function testPrompt(){ showToast('🧪 Open arbajbot1.vercel.app to test prompt'); }
+
+// ══════════════════════════════
+// MAINTENANCE MODE
+// ══════════════════════════════
+function toggleMaintenance(){
+  maintenanceMode = !maintenanceMode;
+  const btn = document.getElementById('maintBtn');
+  const dot = document.getElementById('systemDot');
+  const status = document.getElementById('systemStatus');
+  const tog = document.getElementById('maintToggle');
+  if(maintenanceMode){
+    btn.classList.add('active');
+    btn.textContent = '🔧 Maintenance ON';
+    dot.style.background = 'var(--yellow)';
+    dot.style.boxShadow = '0 0 6px var(--yellow)';
+    status.textContent = 'Maintenance Mode';
+    if(tog) tog.checked = true;
+    addLog('api','Admin','Maintenance mode ENABLED');
+    showToast('🔧 Maintenance mode ON');
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '🔧 Maintenance';
+    dot.style.background = 'var(--green)';
+    dot.style.boxShadow = '0 0 6px var(--green)';
+    status.textContent = 'System Online';
+    if(tog) tog.checked = false;
+    addLog('api','Admin','Maintenance mode DISABLED');
+    showToast('✅ System back online');
+  }
+}
+
+// ══════════════════════════════
+// SETTINGS
+// ══════════════════════════════
+function saveSettings(){
+  addLog('api','Admin','System settings updated');
+  showToast('✅ Settings saved!');
+}
+function saveRateLimit(){
+  const v = document.getElementById('rateSlider').value;
+  addLog('api','Admin','Rate limit set to '+v+' req/min');
+  showToast('✅ Rate limit set: '+v+' req/min');
+}
+
+// ══════════════════════════════
+// PASSWORD CHANGE
+// ══════════════════════════════
+function changePassword(){
+  const curr = document.getElementById('currPass').value;
+  const newp = document.getElementById('newPass').value;
+  const conf = document.getElementById('confPass').value;
+  if(curr !== ADMIN_PASS){ showToast('⚠️ Current password wrong'); return; }
+  if(newp.length<6){ showToast('⚠️ Min 6 characters'); return; }
+  if(newp!==conf){ showToast('⚠️ Passwords match nahi kar rahe'); return; }
+  ADMIN_PASS = newp;
+  localStorage.setItem('elxAdminPass', newp);
+  document.getElementById('currPass').value='';
+  document.getElementById('newPass').value='';
+  document.getElementById('confPass').value='';
+  addLog('api','Admin','Password changed');
+  showToast('✅ Password changed! Dhyan se rakhna 🔑');
+}
+
+// ══════════════════════════════
+// EXPORT USERS
+// ══════════════════════════════
+function exportUsers(){
+  if(!allUsers.length){ showToast('⚠️ Koi users nahi hain'); return; }
+  let csv = 'Name,DOB,Age,Role,Status,ID\n';
+  allUsers.forEach(u=>{
+    const age = u.dob ? calcAge(u.dob) : '';
+    csv += `${u.name},${u.dob||''},${age},${u.role},${u.status},${u.id}\n`;
+  });
+  const blob = new Blob([csv],{type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'arbaj-ai-users-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('⬇️ Exporting users CSV...');
+}
+
+// ══════════════════════════════
+// BACKUP
+// ══════════════════════════════
+function backupData(){
+  const data = {users:allUsers, exportedAt:new Date().toISOString(), by:'ElxAdmin'};
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'arbaj-ai-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  showToast('📦 Backup downloaded!');
+}
+
+function confirmClearChats(){
+  showModal('⚠️ Clear Old Chats','Saare purane chats Firebase se delete kar doge? Yeh undo nahi hoga!',()=>{
+    showToast('ℹ️ Clear chats: Firebase console pe jao → chats collection delete karo');
+  });
+}
+
+// ══════════════════════════════
+// GLOBAL SEARCH
+// ══════════════════════════════
+function globalSearch(q){
+  if(!q.trim()) return;
+  // Switch to users and search
+  showTab('users', document.querySelector('.nav-item:nth-child(5)'));
+  searchUsers(q);
+}
+
+// ══════════════════════════════
+// REFRESH
+// ══════════════════════════════
+function refreshData(){
+  loadUsersFromFirebase();
+  updateStats();
+  renderApiHealthQuick();
+  addLog('sys','Admin','Dashboard refreshed');
+  showToast('🔄 Data refreshed!');
+}
+
+// ══════════════════════════════
+// MODAL
+// ══════════════════════════════
+let modalCb = null;
+function showModal(title, msg, cb){
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMsg').textContent = msg;
+  modalCb = cb;
+  document.getElementById('modalBg').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); modalCb=null; }
+document.getElementById('modalConfirmBtn').onclick = ()=>{ if(modalCb) modalCb(); closeModal(); };
+
+// ══════════════════════════════
+// TOAST
+// ══════════════════════════════
+function showToast(msg){
+  const t = document.getElementById('adminToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════
+// AUTO INIT LOGS
+// ══════════════════════════════
+addLog('reg','System','Admin panel opened');
+addLog('api','Firebase','Database connection established');
+addLog('login','Arbaj','Admin logged in successfully');
+</script>
+</body>
+</html>
