@@ -86,7 +86,7 @@ export default async function handler(req, res) {
 
     // ── SYSTEM PROMPT ──
     let systemPrompt = `You are Elx AI Pro — a powerful AI assistant created by Arbaj Ansari.
-Reply Accurate, solid, confident like ChatGPT. Use bullets for lists. Use emojis occasionally.
+Reply Accurate and related there topic explain Short, solid, confident like ChatGPT  and Gemini . Use bullets for lists. Use emojis occasionally.
 Never say you are Claude, Llama, Anthropic, or Meta. You are Elx AI Pro by Arbaj Ansari.
 User name: ${userName || "there"}.`;
 
@@ -129,10 +129,34 @@ User name: ${userName || "there"}.`;
     const gData = await gRes.json();
     if (gData.error) return res.status(400).json({ error: gData.error.message });
 
-    res.status(200).json({
-      reply: gData.choices?.[0]?.message?.content || "",
-      cards
-    });
+    const reply = gData.choices?.[0]?.message?.content || "";
+    const userMsg = messages[messages.length - 1]?.content || "";
+
+    // ── SAVE CHAT TO FIREBASE (Firestore REST API — no extra package needed) ──
+    try {
+      const projectId = "arbajchatbot";
+      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/chats`;
+      await fetch(firestoreUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fields: {
+            userName:    { stringValue: userName || "Anonymous" },
+            userMessage: { stringValue: userMsg },
+            aiReply:     { stringValue: reply },
+            model:       { stringValue: model || "elx" },
+            webSearch:   { booleanValue: webSearch || false },
+            hasImage:    { booleanValue: !!image },
+            timestamp:   { stringValue: new Date().toISOString() },
+          }
+        })
+      });
+    } catch (fe) {
+      console.warn("Firebase save failed:", fe.message);
+      // Chat still works even if save fails
+    }
+
+    res.status(200).json({ reply, cards });
 
   } catch (err) {
     res.status(500).json({ error: "Server error: " + err.message });
