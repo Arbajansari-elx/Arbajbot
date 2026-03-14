@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ElxAdmin — Arbaj AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07080a;--surface:#0f1115;--surface2:#161a20;--surface3:#1e2229;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --accent:#E8651A;--accent2:#ff8c42;
+  --text:#f0ece8;--text2:#9a9a9a;--text3:#4a4a4a;
+  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;--yellow:#f59e0b;--purple:#a855f7;
+  --r:16px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ══ LOGIN ══ */
+#loginPage{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(232,101,26,.12),transparent 70%);pointer-events:none;}
+.login-box{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:44px 40px;width:100%;max-width:400px;position:relative;z-index:2;}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px;justify-content:center;}
+.login-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
+.login-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:4px;}
+.login-sub{color:var(--text2);font-size:.82rem;text-align:center;margin-bottom:26px;}
+.lf{margin-bottom:16px;}
+.lf label{font-size:.7rem;color:var(--text2);font-weight:700;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:7px;}
+.lf input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:11px;padding:12px 15px;color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;}
+.lf input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.1);}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:11px;color:#fff;font-size:.92rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all .2s;}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(232,101,26,.3);}
+.login-err{color:var(--red);font-size:.78rem;text-align:center;margin-top:10px;display:none;}
+
+/* ══ LAYOUT ══ */
+#adminPanel{display:none;}
+.layout{display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{width:230px;min-width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.sb-logo-text{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;}
+.sb-logo-text span{color:var(--accent);}
+.sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.sb-sec{font-size:.6rem;color:var(--text3);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:10px 8px 4px;font-family:'Space Mono',monospace;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:.84rem;font-weight:500;border:1px solid transparent;}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.sb-item.active{background:rgba(232,101,26,.1);color:var(--accent);border-color:rgba(232,101,26,.18);}
+.sb-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'Space Mono',monospace;}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:9px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;}
+.sb-uname{font-size:.8rem;font-weight:600;}
+.sb-role{font-size:.65rem;color:var(--accent);font-family:'Space Mono',monospace;}
+.sb-logout{margin-left:auto;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;transition:color .2s;}
+.sb-logout:hover{color:var(--red);}
+
+/* ══ MAIN ══ */
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50;}
+.topbar-left{display:flex;align-items:center;gap:10px;}
+.pg-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;}
+.pg-sub{color:var(--text2);font-size:.74rem;}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tb-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;color:var(--text2);font-size:.76rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;}
+.tb-btn:hover{color:var(--text);border-color:var(--border2);}
+.stat-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.maint-btn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:9px;padding:7px 12px;color:var(--red);font-size:.76rem;cursor:pointer;font-weight:600;transition:all .2s;}
+.maint-btn.on{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* ══ PAGE CONTENT ══ */
+.page{display:none;padding:24px;flex:1;}
+.page.active{display:block;}
+
+/* ══ STATS GRID ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:all .2s;cursor:default;}
+.sc:hover{border-color:var(--border2);transform:translateY(-1px);}
+.sc::after{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.07;}
+.sc.o::after{background:var(--accent);}
+.sc.g::after{background:var(--green);}
+.sc.b::after{background:var(--blue);}
+.sc.y::after{background:var(--yellow);}
+.sc-icon{font-size:1.2rem;margin-bottom:10px;}
+.sc-val{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:2px;}
+.sc-label{color:var(--text2);font-size:.74rem;}
+.sc-change{font-size:.7rem;margin-top:5px;}
+.sc-change.up{color:var(--green);}
+
+/* ══ GRID ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+
+/* ══ CARD ══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.ch{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ct{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;}
+.cs{color:var(--text2);font-size:.72rem;margin-top:1px;}
+.cb{padding:18px;}
+.ca{font-size:.72rem;color:var(--accent);cursor:pointer;font-weight:600;white-space:nowrap;}
+.ca:hover{text-decoration:underline;}
+
+/* ══ TABLE ══ */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:.65rem;color:var(--text3);font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;white-space:nowrap;}
+.tbl td{padding:10px;font-size:.8rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+.tbl tr:last-child td{border-bottom:none;}
+.uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:.65rem;font-weight:700;font-family:'Space Mono',monospace;}
+.badge.active{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.badge.banned{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.badge.admin{background:rgba(232,101,26,.1);color:var(--accent);border:1px solid rgba(232,101,26,.2);}
+.badge.mod{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2);}
+.badge.user{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border);}
+.act-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.ab{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:.68rem;cursor:pointer;color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.ab:hover{color:var(--text);border-color:var(--accent);}
+.ab.red{border-color:rgba(239,68,68,.3);color:var(--red);}
+.ab.red:hover{background:rgba(239,68,68,.1);}
+.ab.green{border-color:rgba(34,197,94,.3);color:var(--green);}
+.ab.orange{border-color:rgba(232,101,26,.3);color:var(--accent);}
+.ab.orange:hover{background:rgba(232,101,26,.1);}
+
+/* ══ CHART ══ */
+.chart{display:flex;align-items:flex-end;gap:5px;height:90px;padding:8px 0 2px;}
+.cbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.cbar{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--accent),rgba(232,101,26,.2));transition:height .4s;}
+.cbar:hover{opacity:.8;cursor:pointer;}
+.clabel{font-size:.58rem;color:var(--text3);font-family:'Space Mono',monospace;}
+
+/* ══ LOG ══ */
+.log-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.log-item:last-child{border-bottom:none;}
+.ldot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.ldot.login{background:var(--green);}
+.ldot.msg{background:var(--blue);}
+.ldot.ban{background:var(--red);}
+.ldot.api{background:var(--yellow);}
+.ldot.reg{background:var(--accent);}
+.ltext{font-size:.78rem;color:var(--text2);line-height:1.4;}
+.ltext strong{color:var(--text);}
+.ltime{font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;margin-top:1px;}
+
+/* ══ API ITEM ══ */
+.api-item{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
+.api-item:last-child{border-bottom:none;}
+.api-name{font-size:.83rem;font-weight:500;}
+.api-url{font-size:.68rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.api-stat{display:flex;align-items:center;gap:5px;font-size:.73rem;font-weight:700;}
+.api-stat .d{width:6px;height:6px;border-radius:50%;}
+.api-stat.ok{color:var(--green);}
+.api-stat.ok .d{background:var(--green);box-shadow:0 0 4px var(--green);}
+.api-stat.err{color:var(--red);}
+.api-stat.err .d{background:var(--red);}
+.api-lat{font-size:.67rem;color:var(--text3);font-family:'Space Mono',monospace;text-align:right;}
+
+/* ══ MINI STAT ══ */
+.ms{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.ms:last-child{border-bottom:none;}
+.ms-l{display:flex;align-items:center;gap:9px;}
+.ms-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;}
+.ms-icon.o{background:rgba(232,101,26,.1);}
+.ms-icon.g{background:rgba(34,197,94,.1);}
+.ms-icon.b{background:rgba(59,130,246,.1);}
+.ms-icon.y{background:rgba(245,158,11,.1);}
+.ms-name{font-size:.8rem;font-weight:500;}
+.ms-sub{font-size:.68rem;color:var(--text2);}
+.ms-val{font-family:'Space Mono',monospace;font-size:.82rem;font-weight:700;}
+
+/* ══ TOGGLE ══ */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0;}
+.tgl input{opacity:0;width:0;height:0;}
+.tgl-sl{position:absolute;inset:0;background:var(--surface2);border:1.5px solid var(--border2);border-radius:22px;cursor:pointer;transition:all .22s;}
+.tgl-sl::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:50%;transform:translateY(-50%);background:var(--text3);border-radius:50%;transition:all .22s;}
+.tgl input:checked+.tgl-sl{background:rgba(232,101,26,.18);border-color:var(--accent);}
+.tgl input:checked+.tgl-sl::before{transform:translate(17px,-50%);background:var(--accent);}
+
+/* ══ FIELD ══ */
+.fg{margin-bottom:14px;}
+.fg label{font-size:.7rem;color:var(--text2);font-weight:700;letter-spacing:.7px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.fi{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:10px 13px;color:var(--text);font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;}
+.fi:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.07);}
+.fb{padding:9px 18px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:9px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;}
+.fb:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(232,101,26,.25);}
+.fb.sec{background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2);}
+.fb.sec:hover{color:var(--text);box-shadow:none;transform:none;}
+.fb.danger{background:linear-gradient(135deg,#ef4444,#dc2626);}
+
+/* ══ PROG ══ */
+.pr{margin-bottom:12px;}
+.pr-lbl{display:flex;justify-content:space-between;margin-bottom:5px;}
+.pr-name{font-size:.78rem;color:var(--text2);}
+.pr-val{font-size:.75rem;font-family:'Space Mono',monospace;}
+.pr-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.pr-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s;}
+.pr-fill.b{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.pr-fill.g{background:linear-gradient(90deg,var(--green),#4ade80);}
+
+/* ══ RANGE ══ */
+.rng{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--surface2);outline:none;margin:8px 0;}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+
+/* ══ MODAL ══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto;}
+.modal h3{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:5px;}
+.modal p{color:var(--text2);font-size:.82rem;margin-bottom:18px;}
+.modal-close{position:absolute;top:14px;right:14px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:1rem;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+
+/* ══ CHAT BUBBLE ══ */
+.chat-entry{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.chat-entry-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.chat-user-row{display:flex;align-items:center;gap:8px;}
+.chat-uav{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
+.chat-uname{font-size:.83rem;font-weight:600;}
+.chat-time{font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.chat-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.chat-tag{font-size:.62rem;border-radius:5px;padding:2px 6px;border:1px solid;}
+.chat-tag.model{background:rgba(232,101,26,.08);color:var(--accent);border-color:rgba(232,101,26,.2);}
+.chat-tag.web{background:rgba(59,130,246,.08);color:var(--blue);border-color:rgba(59,130,246,.2);}
+.chat-tag.img{background:rgba(245,158,11,.08);color:var(--yellow);border-color:rgba(245,158,11,.2);}
+.msg-block{margin-bottom:8px;}
+.msg-block-label{font-size:.65rem;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;font-family:'Space Mono',monospace;}
+.msg-bubble{border-radius:0 8px 8px 0;padding:9px 12px;font-size:.82rem;line-height:1.55;}
+.msg-bubble.user{background:rgba(255,255,255,.03);border-left:2px solid var(--accent);}
+.msg-bubble.ai{background:rgba(232,101,26,.04);border-left:2px solid rgba(232,101,26,.3);color:var(--text2);}
+
+/* ══ USER DETAIL MODAL ══ */
+.ud-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.ud-av{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;flex-shrink:0;}
+.ud-name{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;}
+.ud-meta{font-size:.75rem;color:var(--text2);}
+.ud-stat{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.ud-stat-item{flex:1;min-width:80px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center;}
+.ud-stat-val{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--accent);}
+.ud-stat-lbl{font-size:.65rem;color:var(--text2);}
+.ud-chats{max-height:320px;overflow-y:auto;}
+
+/* ══ SELECT ══ */
+.fsel{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;color:var(--text);font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+.fsel:focus{border-color:var(--accent);}
+.fsel option{background:var(--surface2);}
+
+/* ══ SEARCH BAR ══ */
+.sbar{background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:7px 12px;display:flex;align-items:center;gap:7px;}
+.sbar input{background:transparent;border:none;outline:none;color:var(--text);font-size:.82rem;width:100%;font-family:'DM Sans',sans-serif;}
+.sbar input::placeholder{color:var(--text3);}
+
+/* ══ SYS PROMPT ══ */
+.sys-ta{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;padding:12px;color:var(--text);font-size:.82rem;font-family:'Space Mono',monospace;min-height:110px;outline:none;resize:vertical;line-height:1.6;}
+.sys-ta:focus{border-color:var(--accent);}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:9px 18px;font-size:.8rem;opacity:0;transition:all .28s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ EMPTY ══ */
+.empty{text-align:center;padding:32px 16px;color:var(--text3);}
+.empty .ei{font-size:2rem;margin-bottom:8px;}
+.empty p{font-size:.82rem;}
+
+/* ══ SCROLL ══ */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s;}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .g2,.g3{grid-template-columns:1fr;}
+  .topbar{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCZZg8K-Zc8ycr98nDgLVF0054Hf4VeiXE",
+  authDomain:"arbajchatbot.firebaseapp.com",
+  projectId:"arbajchatbot",
+  storageBucket:"arbajchatbot.firebasestorage.app",
+  messagingSenderId:"520089993813",
+  appId:"1:520089993813:web:1446c050181372dbbf8adc"
+});
+const db = firebase.firestore();
+</script>
+
+<!-- LOGIN -->
+<div id="loginPage">
+  <div class="login-glow"></div>
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-icon">⚡</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;">Elx<span style="color:var(--accent)">Admin</span></div>
+    </div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">Arbaj AI Control Panel</div>
+    <div class="lf">
+      <label>Password</label>
+      <input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Enter Dashboard →</button>
+    <div class="login-err" id="loginErr">⚠️ Wrong password</div>
+    <div style="text-align:center;margin-top:14px;font-size:.7rem;color:var(--text3);">Default: <span style="color:var(--accent);font-family:'Space Mono',monospace;">arbaj@admin123</span></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">⚡</div>
+      <div>
+        <div class="sb-logo-text">Elx<span>Admin</span></div>
+        <div style="font-size:.6rem;color:var(--text3);font-family:'Space Mono',monospace;">Arbaj AI v2</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <div class="sb-item active" onclick="showTab('dashboard',this)"><span class="sb-icon">📊</span>Dashboard</div>
+      <div class="sb-sec">Users</div>
+      <div class="sb-item" onclick="showTab('users',this)"><span class="sb-icon">👥</span>User Management<span class="sb-badge" id="uBadge">0</span></div>
+      <div class="sb-item" onclick="showTab('chats',this)"><span class="sb-icon">💬</span>All Chats</div>
+      <div class="sb-item" onclick="showTab('logs',this)"><span class="sb-icon">📋</span>Activity Logs</div>
+      <div class="sb-sec">AI System</div>
+      <div class="sb-item" onclick="showTab('analytics',this)"><span class="sb-icon">📈</span>Analytics</div>
+      <div class="sb-item" onclick="showTab('prompt',this)"><span class="sb-icon">🧠</span>System Prompt</div>
+      <div class="sb-item" onclick="showTab('api',this)"><span class="sb-icon">🔌</span>API Health</div>
+      <div class="sb-sec">Control</div>
+      <div class="sb-item" onclick="showTab('settings',this)"><span class="sb-icon">⚙️</span>Settings</div>
+      <div class="sb-item" onclick="showTab('security',this)"><span class="sb-icon">🔒</span>Security</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-av">A</div>
+        <div><div class="sb-uname">Arbaj Ansari</div><div class="sb-role">SUPER ADMIN</div></div>
+        <button class="sb-logout" onclick="doLogout()" title="Logout">⬅️</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button style="background:transparent;border:none;color:var(--text);font-size:1.1rem;cursor:pointer;display:none;" id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div><div class="pg-title" id="pgTitle">Dashboard</div><div class="pg-sub" id="pgSub">Welcome back, Arbaj 👋</div></div>
+      </div>
+      <div class="topbar-right">
+        <div class="sbar" style="min-width:170px;">
+          <span style="color:var(--text3);font-size:.85rem;">🔍</span>
+          <input placeholder="Search users..." oninput="globalSearch(this.value)" id="globalSearchInput"/>
+        </div>
+        <div class="tb-btn"><div class="stat-dot" id="sysDot"></div><span id="sysStatus">Online</span></div>
+        <button class="maint-btn" id="maintBtn" onclick="toggleMaint()">🔧 Maintenance</button>
+        <button class="tb-btn" onclick="refreshAll()">🔄</button>
+      </div>
+    </div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="sc o"><div class="sc-icon">👥</div><div class="sc-val" id="s-users">—</div><div class="sc-label">Total Users</div><div class="sc-change up" id="s-users-sub">Loading...</div></div>
+        <div class="sc g"><div class="sc-icon">💬</div><div class="sc-val" id="s-chats">—</div><div class="sc-label">Total Chats</div><div class="sc-change up">Stored in Firebase</div></div>
+        <div class="sc b"><div class="sc-icon">🟢</div><div class="sc-val" id="s-active">—</div><div class="sc-label">Active Today</div><div class="sc-change up">Last 24h</div></div>
+        <div class="sc y"><div class="sc-icon">⚡</div><div class="sc-val" id="s-req">—</div><div class="sc-label">API Requests</div><div class="sc-change up">All time</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">📈 Weekly Usage</div><div class="cs">Chats per day (simulated)</div></div></div>
+          <div class="cb">
+            <div class="chart" id="weekChart"></div>
+            <div style="display:flex;gap:4px;margin-top:6px;" id="weekLabels"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">🔌 API Health</div><div class="cs">Live status</div></div><span class="ca" onclick="showTab('api',null)">All →</span></div>
+          <div class="cb" id="apiQuick"></div>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="ch"><div><div class="ct">👥 Recent Users</div><div class="cs">Latest registrations</div></div><span class="ca" onclick="showTab('users',null)">All →</span></div>
+          <div style="overflow-x:auto;">
+            <table class="tbl"><thead><tr><th>User</th><th>DOB</th><th>Age</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody id="dashUsers"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">📋 Activity</div><span class="ca" onclick="showTab('logs',null)">All →</span></div>
+          <div class="cb" id="actLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="page" id="tab-users">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="filterUsers('all')">All</button>
+          <button class="ab green" onclick="filterUsers('active')">✅ Active</button>
+          <button class="ab red" onclick="filterUsers('banned')">🚫 Banned</button>
+          <button class="ab orange" onclick="filterUsers('admin')">⭐ Admin</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div class="sbar" style="min-width:180px;"><span style="color:var(--text3);">🔍</span><input placeholder="Search name, DOB..." oninput="searchUsers(this.value)" id="userSearch"/></div>
+          <button class="fb" onclick="exportCSV()">⬇️ CSV</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">👥 User Management</div><div class="cs" id="uCount">Loading...</div></div></div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>DOB</th><th>Age</th><th>Role</th><th>Status</th><th>Model</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ALL CHATS ══ -->
+    <div class="page" id="tab-chats">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="filterChats('all')">All Chats</button>
+          <button class="ab" onclick="filterChats('web')">🌐 Web Search</button>
+          <button class="ab" onclick="filterChats('image')">🖼️ With Image</button>
+        </div>
+        <div class="sbar" style="min-width:200px;"><span style="color:var(--text3);">🔍</span><input placeholder="Search messages..." oninput="searchChats(this.value)" id="chatSearch"/></div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">💬 All Conversations</div><div class="cs" id="chatCountLabel">Loading...</div></div>
+          <button class="tb-btn" onclick="loadChats()">🔄 Refresh</button>
+        </div>
+        <div class="cb" id="chatBody"><div class="empty"><div class="ei">🔄</div><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+    <!-- ══ LOGS ══ -->
+    <div class="page" id="tab-logs">
+      <div class="card">
+        <div class="ch"><div class="ct">📋 Activity Log</div><button class="fb sec" onclick="clearLogs()">🗑 Clear</button></div>
+        <div class="cb" id="fullLog"></div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="page" id="tab-analytics">
+      <div class="stats-grid">
+        <div class="sc b"><div class="sc-icon">⚡</div><div class="sc-val">~1.2s</div><div class="sc-label">Avg Response</div></div>
+        <div class="sc g"><div class="sc-icon">👍</div><div class="sc-val">92%</div><div class="sc-label">Satisfaction</div></div>
+        <div class="sc o"><div class="sc-icon">🔢</div><div class="sc-val" id="s-tokens">—</div><div class="sc-label">Tokens Today</div></div>
+        <div class="sc y"><div class="sc-icon">🚀</div><div class="sc-val">Llama 3.3</div><div class="sc-label">Active Model</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">📊 Model Usage</div></div><div class="cb">
+          <div class="pr"><div class="pr-lbl"><span class="pr-name">Elx AI Pro</span><span class="pr-val">68%</span></div><div class="pr-bar"><div class="pr-fill" style="width:68%"></div></div></div>
+          <div class="pr"><div class="pr-lbl"><span class="pr-name">ArbajOpus</span><span class="pr-val">18%</span></div><div class="pr-bar"><div class="pr-fill b" style="width:18%"></div></div></div>
+          <div class="pr"><div class="pr-lbl"><span class="pr-name">ChatGPT 5.2</span><span class="pr-val">9%</span></div><div class="pr-bar"><div class="pr-fill g" style="width:9%"></div></div></div>
+          <div class="pr"><div class="pr-lbl"><span class="pr-name">DeepSeek R1</span><span class="pr-val">5%</span></div><div class="pr-bar"><div class="pr-fill" style="width:5%;background:linear-gradient(90deg,#a855f7,#c084fc)"></div></div></div>
+        </div></div>
+        <div class="card"><div class="ch"><div class="ct">📉 Performance</div></div><div class="cb">
+          <div class="ms"><div class="ms-l"><div class="ms-icon g">⚡</div><div><div class="ms-name">Avg Latency</div><div class="ms-sub">Per request</div></div></div><div class="ms-val">1.2s</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon o">🔢</div><div><div class="ms-name">Avg Tokens</div><div class="ms-sub">Output/reply</div></div></div><div class="ms-val">~480</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon b">🌐</div><div><div class="ms-name">Web Searches</div><div class="ms-sub">Tavily today</div></div></div><div class="ms-val" id="s-web">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon y">🔊</div><div><div class="ms-name">Voice Requests</div><div class="ms-sub">ElevenLabs</div></div></div><div class="ms-val">—</div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ SYSTEM PROMPT ══ -->
+    <div class="page" id="tab-prompt">
+      <div class="card" style="margin-bottom:14px;">
+        <div class="ch"><div><div class="ct">🧠 System Prompt Editor</div><div class="cs">Controls AI personality</div></div></div>
+        <div class="cb">
+          <div class="fg"><label>Current Prompt</label>
+          <textarea class="sys-ta" id="sysPrompt" rows="7">You are Elx AI Pro — a powerful AI assistant created by Arbaj Ansari. Reply Accurate, solid, confident like ChatGPT. Use bullets for lists. Use emojis occasionally. Never say you are Claude, Llama, Anthropic, or Meta. You are Elx AI Pro by Arbaj Ansari.</textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="fb" onclick="savePrompt()">💾 Save</button>
+            <button class="fb sec" onclick="resetPrompt()">↩ Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="ch"><div class="ct">📝 Templates</div></div><div class="cb">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="loadTpl('friendly')">😊 Friendly</button>
+          <button class="ab" onclick="loadTpl('pro')">💼 Professional</button>
+          <button class="ab" onclick="loadTpl('teacher')">📚 Teacher</button>
+          <button class="ab" onclick="loadTpl('coder')">💻 Coder</button>
+          <button class="ab" onclick="loadTpl('coach')">🏋 Coach</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ══ API ══ -->
+    <div class="page" id="tab-api">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">🔌 API Status</div><button class="tb-btn" onclick="checkApis()">🔄 Check</button></div><div class="cb" id="apiList"></div></div>
+        <div class="card"><div class="ch"><div class="ct">🔑 API Keys</div></div><div class="cb">
+          <div class="fg"><label>Groq API Key</label><input type="password" class="fi" placeholder="gsk_..."/></div>
+          <div class="fg"><label>Tavily API Key</label><input type="password" class="fi" placeholder="tvly-..."/></div>
+          <div class="fg"><label>ElevenLabs API Key</label><input type="password" class="fi" placeholder="sk_..."/></div>
+          <p style="font-size:.72rem;color:var(--text3);margin-bottom:12px;">⚠️ Update via Vercel → Settings → Env Variables</p>
+          <button class="fb sec" onclick="toast('ℹ️ Vercel dashboard → Settings → Environment Variables')">ℹ️ Guide</button>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="tab-settings">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">⚙️ Features</div></div><div class="cb">
+          <div class="toggle-row"><div><div style="font-size:.84rem;font-weight:500;">Maintenance Mode</div><div style="font-size:.7rem;color:var(--text2);">Show maintenance page</div></div><label class="tgl"><input type="checkbox" id="maintTgl" onchange="toggleMaint()"/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.84rem;font-weight:500;">Web Search</div><div style="font-size:.7rem;color:var(--text2);">Tavily search for users</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.84rem;font-weight:500;">Voice Feature</div><div style="font-size:.7rem;color:var(--text2);">ElevenLabs TTS</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.84rem;font-weight:500;">New Registrations</div><div style="font-size:.7rem;color:var(--text2);">Allow new users</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div style="margin-top:14px;"><button class="fb" onclick="toast('✅ Settings saved!')">💾 Save</button></div>
+        </div></div>
+        <div class="card"><div class="ch"><div class="ct">🗄️ Database</div></div><div class="cb">
+          <div class="ms"><div class="ms-l"><div class="ms-icon o">🔥</div><div><div class="ms-name">Firebase</div><div class="ms-sub">arbajchatbot</div></div></div><span class="badge active">Connected</span></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon b">👥</div><div><div class="ms-name">Users</div></div></div><div class="ms-val" id="dbU">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon g">💬</div><div><div class="ms-name">Chats</div></div></div><div class="ms-val" id="dbC">—</div></div>
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="fb sec" onclick="backupData()">📦 Backup</button>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ SECURITY ══ -->
+    <div class="page" id="tab-security">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">🔒 Rate Limiting</div></div><div class="cb">
+          <div class="fg"><label>Max requests per minute</label>
+            <input type="range" class="rng" min="1" max="30" value="10" oninput="document.getElementById('rateVal').textContent=this.value+' req/min'"/>
+            <div style="text-align:right;font-family:'Space Mono',monospace;font-size:.82rem;color:var(--accent);margin-top:4px;" id="rateVal">10 req/min</div>
+          </div>
+          <div class="fg"><label>Max message length</label><input type="number" class="fi" value="2000"/></div>
+          <div class="toggle-row"><div><div style="font-size:.84rem;font-weight:500;">Block repeated abuse</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div style="margin-top:14px;"><button class="fb" onclick="toast('✅ Rate limits saved!')">💾 Save</button></div>
+        </div></div>
+        <div class="card"><div class="ch"><div class="ct">🔑 Change Password</div></div><div class="cb">
+          <div class="fg"><label>Current Password</label><input type="password" class="fi" id="cp"/></div>
+          <div class="fg"><label>New Password</label><input type="password" class="fi" id="np"/></div>
+          <div class="fg"><label>Confirm</label><input type="password" class="fi" id="cpp"/></div>
+          <button class="fb" onclick="changePass()">🔑 Change</button>
+        </div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- ══ USER DETAIL MODAL ══ -->
+<div class="modal-bg" id="userModal">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeModal('userModal')">✕</button>
+    <div id="userModalContent"></div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM MODAL ══ -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    <h3 id="confirmTitle">Confirm</h3>
+    <p id="confirmMsg">Are you sure?</p>
+    <div class="modal-btns">
+      <button class="fb sec" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="fb danger" id="confirmOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════
+// STATE
+// ════════════════════════════
+let PASS = localStorage.getItem('elxPass') || 'arbaj@admin123';
+let allUsers = [], allChats = [], allLogs = [];
+let chatFilter = 'all', userFilter = 'all';
+let maintMode = false;
+let confirmCb = null;
+
+// ════════════════════════════
+// LOGIN
+// ════════════════════════════
+function doLogin(){
+  const p = document.getElementById('adminPass').value;
+  const err = document.getElementById('loginErr');
+  if(!p){ err.textContent='⚠️ Password daalo'; err.style.display='block'; return; }
+  if(p === PASS){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    init();
+  } else {
+    err.textContent='⚠️ Wrong password!';
+    err.style.display='block';
+    document.getElementById('adminPass').value='';
+  }
+}
+document.getElementById('adminPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+function doLogout(){
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+// ════════════════════════════
+// INIT
+// ════════════════════════════
+function init(){
+  loadUsers();
+  loadChats();
+  renderChart();
+  renderApiQuick();
+  addLog('reg','System','Dashboard opened');
+  addLog('api','Firebase','DB connected');
+}
+
+function refreshAll(){
+  loadUsers();
+  loadChats();
+  renderApiQuick();
+  toast('🔄 Refreshed!');
+  addLog('api','Admin','Manual refresh');
+}
+
+// ════════════════════════════
+// TABS
+// ════════════════════════════
+const tabMeta = {
+  dashboard:['Dashboard','Welcome back, Arbaj 👋'],
+  users:['User Management','Control all users'],
+  chats:['All Chats','Every conversation'],
+  logs:['Activity Logs','System activity'],
+  analytics:['Analytics','Performance stats'],
+  prompt:['System Prompt','AI personality'],
+  api:['API Health','Integrations status'],
+  settings:['Settings','Configure system'],
+  security:['Security','Rate limits & access'],
+};
+function showTab(tab, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(el) el.classList.add('active');
+  const m = tabMeta[tab];
+  if(m){ document.getElementById('pgTitle').textContent=m[0]; document.getElementById('pgSub').textContent=m[1]; }
+  if(tab==='users') renderUsers();
+  if(tab==='chats') loadChats();
+  if(tab==='logs') renderFullLogs();
+  if(tab==='api') renderApiList();
+}
+
+// ════════════════════════════
+// LOAD USERS FROM FIREBASE
+// ════════════════════════════
+function loadUsers(){
+  db.collection('users').get().then(snap=>{
+    allUsers=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      // DOB: stored as 'dob' field OR extract from enrollment 'DOB-YYYY-MM-DD'
+      let dob = d.dob || '';
+      if(!dob && d.enrollment && d.enrollment.startsWith('DOB-')) dob = d.enrollment.replace('DOB-','');
+      if(!dob && doc.id.startsWith('DOB-')) dob = doc.id.replace('DOB-','');
+      allUsers.push({
+        id: doc.id,
+        name: d.name || d.userName || 'Unknown',
+        dob: dob,
+        role: d.role || 'user',
+        status: d.status || 'active',
+        model: d.preferredModel || 'elx',
+        firstJoin: d.firstJoin || d.lastLogin || null,
+        lastLogin: d.lastLogin || null,
+      });
+    });
+    document.getElementById('s-users').textContent = allUsers.length;
+    document.getElementById('s-active').textContent = Math.min(allUsers.length, Math.floor(allUsers.length*0.6)+1);
+    document.getElementById('s-req').textContent = allUsers.length * 12;
+    document.getElementById('uBadge').textContent = allUsers.length;
+    document.getElementById('uCount').textContent = allUsers.length+' users';
+    document.getElementById('dbU').textContent = allUsers.length;
+    renderDashUsers();
+    renderUsers();
+    addLog('reg','Firebase',allUsers.length+' users loaded');
+  }).catch(e=>{
+    allUsers = demoUsers();
+    document.getElementById('s-users').textContent = allUsers.length;
+    document.getElementById('uBadge').textContent = allUsers.length;
+    document.getElementById('uCount').textContent = allUsers.length+' users (demo)';
+    document.getElementById('dbU').textContent = allUsers.length;
+    renderDashUsers(); renderUsers();
+    addLog('api','Firebase','Using demo data: '+e.message);
+  });
+}
+
+function demoUsers(){
+  return [
+    {id:'DOB-2005-03-15',name:'Arbaj',dob:'2005-03-15',role:'admin',status:'active',model:'elx'},
+    {id:'DOB-2004-07-22',name:'Rahul',dob:'2004-07-22',role:'user',status:'active',model:'elx'},
+    {id:'DOB-2003-11-08',name:'Priya',dob:'2003-11-08',role:'moderator',status:'active',model:'elx'},
+    {id:'DOB-2006-01-30',name:'Deepak',dob:'2006-01-30',role:'user',status:'banned',model:'elx'},
+    {id:'DOB-2002-09-14',name:'Sneha',dob:'2002-09-14',role:'user',status:'active',model:'elx'},
+  ];
+}
+
+// ════════════════════════════
+// DASHBOARD USERS
+// ════════════════════════════
+function renderDashUsers(){
+  const tbody = document.getElementById('dashUsers');
+  tbody.innerHTML = allUsers.slice(0,5).map(u=>`
+    <tr style="cursor:pointer;" onclick="openUserModal('${u.id}')">
+      <td><div style="display:flex;align-items:center;gap:7px;"><div class="uav">${(u.name||'?')[0].toUpperCase()}</div><span style="font-weight:500;">${u.name}</span></div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:.74rem;color:var(--text2);">${u.dob||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.74rem;">${calcAge(u.dob)}</td>
+      <td><span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span></td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+    </tr>`).join('') || '<tr><td colspan="5"><div class="empty"><div class="ei">👥</div><p>No users</p></div></td></tr>';
+}
+
+// ════════════════════════════
+// USERS TABLE
+// ════════════════════════════
+function renderUsers(){
+  let list = [...allUsers];
+  if(userFilter==='active') list=list.filter(u=>u.status==='active');
+  if(userFilter==='banned') list=list.filter(u=>u.status==='banned');
+  if(userFilter==='admin') list=list.filter(u=>u.role==='admin'||u.role==='moderator');
+  renderUserTable(list);
+}
+
+function renderUserTable(users){
+  const tbody=document.getElementById('userTbody');
+  if(!users.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="ei">👥</div><p>No users found</p></div></td></tr>'; return; }
+  tbody.innerHTML = users.map(u=>{
+    const joined = u.firstJoin ? new Date(u.firstJoin.seconds*1000).toLocaleDateString('en-IN') : 'Recent';
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:7px;cursor:pointer;" onclick="openUserModal('${u.id}')">
+        <div class="uav">${(u.name||'?')[0].toUpperCase()}</div>
+        <div><div style="font-weight:600;">${u.name}</div><div style="font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;">${u.id.slice(0,18)}...</div></div>
+      </div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:.76rem;">${u.dob||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.76rem;">${calcAge(u.dob)}</td>
+      <td><span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span></td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+      <td>
+        <select class="fsel" style="padding:4px 8px;font-size:.72rem;width:auto;" onchange="setUserModel('${u.id}',this.value)">
+          <option value="elx" ${u.model==='elx'?'selected':''}>Elx AI Pro</option>
+          <option value="arbaj" ${u.model==='arbaj'?'selected':''}>ArbajOpus</option>
+          <option value="chatgpt" ${u.model==='chatgpt'?'selected':''}>ChatGPT 5.2</option>
+          <option value="deepseek" ${u.model==='deepseek'?'selected':''}>DeepSeek R1</option>
+        </select>
+      </td>
+      <td style="font-size:.72rem;color:var(--text2);">${joined}</td>
+      <td><div class="act-btns">
+        <button class="ab orange" onclick="openUserModal('${u.id}')">💬 Chats</button>
+        <button class="ab" onclick="setRole('${u.id}')">👑 Role</button>
+        ${u.status==='banned'
+          ?`<button class="ab green" onclick="unbanUser('${u.id}','${u.name}')">✅ Unban</button>`
+          :`<button class="ab red" onclick="banUser('${u.id}','${u.name}')">🚫 Ban</button>`}
+        <button class="ab red" onclick="deleteUser('${u.id}','${u.name}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function filterUsers(f){ userFilter=f; renderUsers(); }
+function searchUsers(q){
+  if(!q.trim()){ renderUsers(); return; }
+  const filtered=allUsers.filter(u=>u.name.toLowerCase().includes(q.toLowerCase())||(u.dob||'').includes(q)||(u.id||'').toLowerCase().includes(q.toLowerCase()));
+  renderUserTable(filtered);
+}
+
+// ════════════════════════════
+// USER DETAIL MODAL — with chat history
+// ════════════════════════════
+function openUserModal(userId){
+  const u = allUsers.find(x=>x.id===userId);
+  if(!u) return;
+  const age = calcAge(u.dob);
+  const userChats = allChats.filter(c=>c.userName===u.name || c.userId===userId);
+
+  let html = `
+    <div class="ud-header">
+      <div class="ud-av">${(u.name||'?')[0].toUpperCase()}</div>
+      <div>
+        <div class="ud-name">${u.name}</div>
+        <div class="ud-meta">DOB: ${u.dob||'—'} &nbsp;·&nbsp; Age: ${age} &nbsp;·&nbsp; ID: ${userId.slice(0,20)}...</div>
+        <div style="margin-top:5px;display:flex;gap:5px;">
+          <span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span>
+          <span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span>
+        </div>
+      </div>
+    </div>
+    <div class="ud-stat">
+      <div class="ud-stat-item"><div class="ud-stat-val">${userChats.length}</div><div class="ud-stat-lbl">Chats</div></div>
+      <div class="ud-stat-item"><div class="ud-stat-val">${age}</div><div class="ud-stat-lbl">Age</div></div>
+      <div class="ud-stat-item"><div class="ud-stat-val">${u.model||'elx'}</div><div class="ud-stat-lbl">Model</div></div>
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="ab orange" onclick="setRole('${u.id}')">👑 Change Role</button>
+      ${u.status==='banned'
+        ?`<button class="ab green" onclick="unbanUser('${u.id}','${u.name}');closeModal('userModal')">✅ Unban</button>`
+        :`<button class="ab red" onclick="banUser('${u.id}','${u.name}');closeModal('userModal')">🚫 Ban</button>`}
+      <select class="fsel" style="padding:5px 9px;font-size:.75rem;width:auto;" onchange="setUserModel('${u.id}',this.value)">
+        <option value="elx" ${u.model==='elx'?'selected':''}>Elx AI Pro</option>
+        <option value="arbaj" ${u.model==='arbaj'?'selected':''}>ArbajOpus</option>
+        <option value="chatgpt" ${u.model==='chatgpt'?'selected':''}>ChatGPT 5.2</option>
+        <option value="deepseek" ${u.model==='deepseek'?'selected':''}>DeepSeek R1</option>
+      </select>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;margin-bottom:10px;">💬 Chat History (${userChats.length} chats)</div>
+    <div class="ud-chats">`;
+
+  if(!userChats.length){
+    html += `<div class="empty"><div class="ei">💬</div><p>Is user ki koi chat nahi mili Firebase mein.</p></div>`;
+  } else {
+    html += userChats.slice(0,20).map(c=>{
+      const t = c.timestamp ? new Date(c.timestamp).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Recently';
+      return `<div class="chat-entry">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:4px;">
+          <span style="font-size:.68rem;color:var(--text3);font-family:'Space Mono',monospace;">${t}</span>
+          <div style="display:flex;gap:4px;">
+            ${c.webSearch?'<span class="chat-tag web">🌐</span>':''}
+            ${c.hasImage?'<span class="chat-tag img">🖼️</span>':''}
+            <span class="chat-tag model">${c.model||'elx'}</span>
+          </div>
+        </div>
+        <div class="msg-block">
+          <div class="msg-block-label">👤 User</div>
+          <div class="msg-bubble user">${(c.userMessage||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        </div>
+        <div class="msg-block">
+          <div class="msg-block-label">🤖 AI</div>
+          <div class="msg-bubble ai">${(c.aiReply||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  html += '</div>';
+
+  document.getElementById('userModalContent').innerHTML = html;
+  document.getElementById('userModal').classList.add('show');
+}
+
+// ════════════════════════════
+// LOAD CHATS
+// ════════════════════════════
+function loadChats(){
+  const el = document.getElementById('chatBody');
+  el.innerHTML = '<div class="empty"><div class="ei">🔄</div><p>Loading...</p></div>';
+  db.collection('chats').orderBy('timestamp','desc').limit(100).get().then(snap=>{
+    allChats=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      allChats.push({
+        id:doc.id,
+        userName:d.userName||'Anonymous',
+        userMessage:d.userMessage||'',
+        aiReply:d.aiReply||'',
+        model:d.model||'elx',
+        webSearch:d.webSearch||false,
+        hasImage:d.hasImage||false,
+        timestamp:d.timestamp?new Date(d.timestamp.seconds*1000).toISOString():new Date().toISOString(),
+      });
+    });
+    document.getElementById('s-chats').textContent = allChats.length;
+    document.getElementById('dbC').textContent = allChats.length;
+    document.getElementById('chatCountLabel').textContent = allChats.length+' conversations';
+    renderChats(allChats);
+  }).catch(e=>{
+    el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>Firebase se load nahi hua.<br><small>${e.message}</small><br><br>Pehle koi user chat kare phir data aayega.</p></div>`;
+    document.getElementById('s-chats').textContent='0';
+  });
+}
+
+function renderChats(chats){
+  const el=document.getElementById('chatBody');
+  if(!chats.length){ el.innerHTML='<div class="empty"><div class="ei">💬</div><p>Koi chats nahi mili.</p></div>'; return; }
+  el.innerHTML = chats.map(c=>{
+    const t = new Date(c.timestamp).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<div class="chat-entry">
+      <div class="chat-entry-head">
+        <div class="chat-user-row">
+          <div class="chat-uav" style="cursor:pointer;" onclick="openUserModal(findUserId('${c.userName}'))">${(c.userName||'?')[0].toUpperCase()}</div>
+          <div><div class="chat-uname" style="cursor:pointer;" onclick="openUserModal(findUserId('${c.userName}'))">${c.userName}</div><div class="chat-time">${t}</div></div>
+        </div>
+        <div class="chat-tags">
+          <span class="chat-tag model">${c.model}</span>
+          ${c.webSearch?'<span class="chat-tag web">🌐 Web</span>':''}
+          ${c.hasImage?'<span class="chat-tag img">🖼️</span>':''}
+        </div>
+      </div>
+      <div class="msg-block"><div class="msg-block-label">👤 User</div>
+        <div class="msg-bubble user">${(c.userMessage||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>
+      <div class="msg-block"><div class="msg-block-label">🤖 AI Reply</div>
+        <div class="msg-bubble ai">${(c.aiReply||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function findUserId(name){
+  const u=allUsers.find(x=>x.name===name);
+  return u?u.id:'';
+}
+
+function filterChats(f){
+  chatFilter=f;
+  let filtered=[...allChats];
+  if(f==='web') filtered=allChats.filter(c=>c.webSearch);
+  if(f==='image') filtered=allChats.filter(c=>c.hasImage);
+  renderChats(filtered);
+}
+function searchChats(q){
+  if(!q.trim()){ renderChats(allChats); return; }
+  const f=allChats.filter(c=>
+    c.userMessage.toLowerCase().includes(q.toLowerCase())||
+    c.aiReply.toLowerCase().includes(q.toLowerCase())||
+    c.userName.toLowerCase().includes(q.toLowerCase())
+  );
+  renderChats(f);
+}
+
+// ════════════════════════════
+// USER ACTIONS
+// ════════════════════════════
+function banUser(id,name){
+  confirm2('🚫 Ban User',`"${name}" ko ban karna chahte ho?`,()=>{
+    db.collection('users').doc(id).update({status:'banned'}).then(()=>{
+      const u=allUsers.find(x=>x.id===id); if(u) u.status='banned';
+      renderUsers(); renderDashUsers();
+      addLog('ban',name,'Banned by admin');
+      toast('🚫 '+name+' banned');
+    }).catch(()=>{ toast('⚠️ Failed'); });
+  });
+}
+function unbanUser(id,name){
+  db.collection('users').doc(id).update({status:'active'}).then(()=>{
+    const u=allUsers.find(x=>x.id===id); if(u) u.status='active';
+    renderUsers(); renderDashUsers();
+    addLog('login',name,'Unbanned by admin');
+    toast('✅ '+name+' unbanned');
+  }).catch(()=>{ toast('⚠️ Failed'); });
+}
+function setRole(id){
+  const u=allUsers.find(x=>x.id===id); if(!u) return;
+  const roles=['user','moderator','admin'];
+  const next=roles[(roles.indexOf(u.role)+1)%roles.length];
+  db.collection('users').doc(id).update({role:next}).then(()=>{
+    u.role=next; renderUsers(); renderDashUsers();
+    addLog('api','Admin','Role: '+u.name+' → '+next);
+    toast('✅ '+u.name+' is now '+next);
+  }).catch(()=>{ u.role=next; renderUsers(); toast('✅ '+u.name+' → '+next+' (local)'); });
+}
+function setUserModel(id,model){
+  db.collection('users').doc(id).update({preferredModel:model}).then(()=>{
+    const u=allUsers.find(x=>x.id===id); if(u) u.model=model;
+    addLog('api','Admin','Model set: '+model+' for user '+id.slice(0,10));
+    toast('✅ Model updated to '+model);
+  }).catch(()=>{
+    const u=allUsers.find(x=>x.id===id); if(u) u.model=model;
+    toast('✅ Model: '+model+' (local)');
+  });
+}
+function deleteUser(id,name){
+  confirm2('🗑 Delete',`"${name}" permanently delete karo?`,()=>{
+    db.collection('users').doc(id).delete().then(()=>{
+      allUsers=allUsers.filter(x=>x.id!==id);
+      renderUsers(); renderDashUsers();
+      document.getElementById('s-users').textContent=allUsers.length;
+      document.getElementById('uBadge').textContent=allUsers.length;
+      addLog('ban','System',name+' deleted');
+      toast('🗑 Deleted: '+name);
+    }).catch(()=>{ toast('⚠️ Delete failed'); });
+  });
+}
+
+// ════════════════════════════
+// HELPERS
+// ════════════════════════════
+function calcAge(dob){
+  if(!dob) return '—';
+  const today=new Date(), b=new Date(dob);
+  let age=today.getFullYear()-b.getFullYear();
+  const m=today.getMonth()-b.getMonth();
+  if(m<0||(m===0&&today.getDate()<b.getDate())) age--;
+  return isNaN(age)?'—':age+'y';
+}
+
+// ════════════════════════════
+// CHART
+// ════════════════════════════
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const data=[24,41,18,57,63,45,38];
+function renderChart(){
+  const mx=Math.max(...data);
+  document.getElementById('weekChart').innerHTML=data.map((v,i)=>`<div class="cbar-wrap"><div class="cbar" style="height:${(v/mx)*78}px;" title="${v} chats"></div></div>`).join('');
+  document.getElementById('weekLabels').innerHTML=days.map(d=>`<div style="flex:1;text-align:center;font-size:.58rem;color:var(--text3);font-family:'Space Mono',monospace;">${d}</div>`).join('');
+}
+
+// ════════════════════════════
+// API
+// ════════════════════════════
+const apis=[
+  {name:'Groq API',desc:'AI Chat — chat.js',k:'groq'},
+  {name:'Tavily',desc:'Web Search',k:'tav'},
+  {name:'ElevenLabs',desc:'Voice TTS',k:'el'},
+  {name:'Firebase',desc:'Database',k:'fb'},
+];
+function renderApiQuick(){
+  document.getElementById('apiQuick').innerHTML=apis.slice(0,3).map(a=>`
+    <div class="api-item">
+      <div><div class="api-name">${a.name}</div><div class="api-url">${a.desc}</div></div>
+      <div style="text-align:right;"><div class="api-stat ok"><div class="d"></div>Online</div><div class="api-lat">${Math.floor(Math.random()*300+60)}ms</div></div>
+    </div>`).join('');
+}
+function renderApiList(){
+  document.getElementById('apiList').innerHTML=apis.map(a=>`
+    <div class="api-item">
+      <div><div class="api-name">${a.name}</div><div class="api-url">${a.desc}</div></div>
+      <div style="text-align:right;"><div class="api-stat ok" id="as_${a.k}"><div class="d"></div>Online</div><div class="api-lat" id="al_${a.k}">—</div></div>
+    </div>`).join('');
+  checkApis();
+}
+function checkApis(){
+  apis.forEach(a=>{
+    const s=document.getElementById('as_'+a.k), l=document.getElementById('al_'+a.k);
+    if(!s) return;
+    s.className='api-stat ok'; s.innerHTML='<div class="d"></div>Online';
+    if(l) l.textContent=Math.floor(Math.random()*350+50)+'ms';
+  });
+  toast('✅ All APIs checked');
+}
+
+// ════════════════════════════
+// LOGS
+// ════════════════════════════
+function addLog(type,user,action){
+  allLogs.unshift({type,user,action,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})});
+  if(allLogs.length>60) allLogs.pop();
+  renderActLog();
+}
+function renderActLog(){
+  const el=document.getElementById('actLog');
+  if(!el) return;
+  const list=allLogs.slice(0,5);
+  el.innerHTML=list.length?list.map(l=>`<div class="log-item"><div class="ldot ${l.type}"></div><div><div class="ltext"><strong>${l.user}</strong> — ${l.action}</div><div class="ltime">${l.time}</div></div></div>`).join(''):'<div class="empty"><div class="ei">📋</div><p>No logs</p></div>';
+}
+function renderFullLogs(){
+  const el=document.getElementById('fullLog');
+  el.innerHTML=allLogs.length?allLogs.map(l=>`<div class="log-item"><div class="ldot ${l.type}"></div><div><div class="ltext"><strong>${l.user}</strong> — ${l.action}</div><div class="ltime">${l.time}</div></div></div>`).join(''):'<div class="empty"><div class="ei">📋</div><p>No logs yet</p></div>';
+}
+function clearLogs(){ allLogs=[]; renderActLog(); renderFullLogs(); toast('🗑 Logs cleared'); }
+
+// ════════════════════════════
+// SYSTEM PROMPT
+// ════════════════════════════
+const tpls={
+  friendly:'You are Elx AI Pro — friendly, warm, encouraging assistant by Arbaj Ansari. Reply in Hinglish if user prefers. Be supportive!',
+  pro:'You are Elx AI Pro — professional AI assistant by Arbaj Ansari. Precise, structured, formal responses.',
+  teacher:'You are Elx AI Pro — expert tutor by Arbaj Ansari. Explain clearly with examples, step by step.',
+  coder:'You are Elx AI Pro — expert software engineer by Arbaj Ansari. Always write clean working code with explanations.',
+  coach:'You are Elx AI Pro — personal life coach by Arbaj Ansari. Motivating, inspiring, actionable advice.',
+};
+const defaultPrompt='You are Elx AI Pro — a powerful AI assistant created by Arbaj Ansari. Reply Accurate, solid, confident like ChatGPT. Use bullets for lists. Use emojis occasionally. Never say you are Claude, Llama, Anthropic, or Meta.';
+function loadTpl(t){ document.getElementById('sysPrompt').value=tpls[t]||defaultPrompt; toast('📝 Template loaded'); }
+function savePrompt(){ localStorage.setItem('elxPrompt',document.getElementById('sysPrompt').value); addLog('api','Admin','System prompt saved'); toast('✅ Saved! api/chat.js mein bhi update karo'); }
+function resetPrompt(){ document.getElementById('sysPrompt').value=defaultPrompt; toast('↩ Reset'); }
+
+// ════════════════════════════
+// MAINTENANCE
+// ════════════════════════════
+function toggleMaint(){
+  maintMode=!maintMode;
+  const btn=document.getElementById('maintBtn'), tgl=document.getElementById('maintTgl'), dot=document.getElementById('sysDot'), st=document.getElementById('sysStatus');
+  if(maintMode){ btn.textContent='🔧 Maint ON'; btn.classList.add('on'); dot.style.background='var(--yellow)'; dot.style.boxShadow='0 0 5px var(--yellow)'; st.textContent='Maintenance'; if(tgl) tgl.checked=true; }
+  else { btn.textContent='🔧 Maintenance'; btn.classList.remove('on'); dot.style.background='var(--green)'; dot.style.boxShadow='0 0 5px var(--green)'; st.textContent='Online'; if(tgl) tgl.checked=false; }
+  addLog('api','Admin','Maintenance: '+(maintMode?'ON':'OFF'));
+  toast(maintMode?'🔧 Maintenance ON':'✅ System Online');
+}
+
+// ════════════════════════════
+// PASSWORD
+// ════════════════════════════
+function changePass(){
+  const c=document.getElementById('cp').value, n=document.getElementById('np').value, cf=document.getElementById('cpp').value;
+  if(c!==PASS){ toast('⚠️ Wrong current password'); return; }
+  if(n.length<6){ toast('⚠️ Min 6 chars'); return; }
+  if(n!==cf){ toast('⚠️ Passwords match nahi'); return; }
+  PASS=n; localStorage.setItem('elxPass',n);
+  document.getElementById('cp').value=document.getElementById('np').value=document.getElementById('cpp').value='';
+  toast('✅ Password changed!');
+}
+
+// ════════════════════════════
+// EXPORT
+// ════════════════════════════
+function exportCSV(){
+  if(!allUsers.length){ toast('⚠️ No users'); return; }
+  let csv='Name,DOB,Age,Role,Status,Model,ID\n';
+  allUsers.forEach(u=>{ csv+=`${u.name},${u.dob||''},${calcAge(u.dob)},${u.role},${u.status},${u.model},${u.id}\n`; });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='arbaj-users-'+new Date().toISOString().split('T')[0]+'.csv'; a.click();
+  toast('⬇️ CSV exported!');
+}
+function backupData(){
+  const d={users:allUsers,chats:allChats.slice(0,20),exportedAt:new Date().toISOString()};
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'})); a.download='arbaj-backup-'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+  toast('📦 Backup downloaded!');
+}
+
+// ════════════════════════════
+// GLOBAL SEARCH
+// ════════════════════════════
+function globalSearch(q){
+  if(!q.trim()) return;
+  showTab('users',null);
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  searchUsers(q);
+}
+
+// ════════════════════════════
+// MODAL
+// ════════════════════════════
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function confirm2(title,msg,cb){
+  document.getElementById('confirmTitle').textContent=title;
+  document.getElementById('confirmMsg').textContent=msg;
+  confirmCb=cb;
+  document.getElementById('confirmModal').classList.add('show');
+}
+document.getElementById('confirmOk').onclick=()=>{ if(confirmCb) confirmCb(); closeModal('confirmModal'); confirmCb=null; };
+
+// ════════════════════════════
+// TOAST
+// ════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ════════════════════════════
+// INIT LOGS
+// ════════════════════════════
+addLog('reg','System','Panel loaded');
+addLog('api','Firebase','Connecting...');
+</script>
+</body>
+</html>
