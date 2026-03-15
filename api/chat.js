@@ -109,12 +109,16 @@ Your ultimate goal is to provide a seamless, highly accurate, and premium experi
 User Name: ${userName || "there"}.`;
 
     if (webContext) {
-      systemPrompt += `\n\nLIVE WEB DATA (use ONLY this to answer — do not use old knowledge for this query):\n${webContext}\n\nRules:
-- Answer ONLY from the web data above
-- Mention key facts with source numbers like [1], [2]
-- If data is unclear, say "Web results mein clearly mention nahi hai"
-- Be concise — max 5 bullet points`;
+  systemPrompt += `\n\n--- LIVE WEB SEARCH CONTEXT ---\n${webContext}\n\n--- SEARCH INSTRUCTIONS ---\nYou have just performed a real-time web search. You MUST use ONLY the information provided in the LIVE WEB SEARCH CONTEXT above to answer the user's query.
+
+Strict Rules for Web Responses:
+1. **Synthesize & Flow:** Do not just read out a robotic list. Read the provided data, connect the dots, and write a highly natural, intelligent, and comprehensive summary.
+2. **Professional Citations:** ALWAYS back up facts, numbers, and claims with inline citations like [1] or [2] immediately after the sentence. If multiple sources agree, combine them: [1][3]. 
+3. **Strict Grounding (No Hallucination):** NEVER use your pre-trained knowledge to answer this. If the exact answer is missing from the context, politely and clearly state: "Current web results mein is exact query ka clear answer mention nahi hai, par context ke mutabiq..." and summarize what IS available.
+4. **Premium Formatting:** Use short, punchy paragraphs. Use bullet points only when listing multiple distinct items or steps. **Bold** the most critical names, dates, or keywords so the user can scan quickly.
+5. **Tone:** Objective, highly accurate, and analytical. You are delivering real-time intelligence.`;
     }
+    
 
     let userMessages = [...messages];
     if (image) {
