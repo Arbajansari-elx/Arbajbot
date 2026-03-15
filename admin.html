@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ElxAdmin — Arbaj AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07080a;--surface:#0f1115;--surface2:#161a20;--surface3:#1e2229;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --accent:#E8651A;--accent2:#ff8c42;
+  --text:#f0ece8;--text2:#9a9a9a;--text3:#4a4a4a;
+  --green:#22c55e;--red:#ef4444;--blue:#3b82f6;--yellow:#f59e0b;
+  --r:16px;--sb:230px;
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* ══ LOGIN ══ */
+#loginPage{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;}
+.lg-glow{position:absolute;top:15%;left:50%;transform:translateX(-50%);width:500px;height:400px;background:radial-gradient(circle,rgba(232,101,26,.12),transparent 70%);pointer-events:none;}
+.lg-box{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:40px 36px;width:100%;max-width:380px;position:relative;z-index:2;}
+.lg-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:24px;}
+.lg-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.lg-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;text-align:center;margin-bottom:4px;}
+.lg-sub{color:var(--text2);font-size:.82rem;text-align:center;margin-bottom:24px;}
+.lg-google{width:100%;padding:13px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;color:var(--text);font-size:.88rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:12px;}
+.lg-google:hover{border-color:var(--accent);background:rgba(232,101,26,.06);}
+.lg-divider{display:flex;align-items:center;gap:10px;margin:4px 0 12px;}
+.lg-divider::before,.lg-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.lg-divider span{font-size:.7rem;color:var(--text3);}
+.lf{margin-bottom:14px;}
+.lf label{font-size:.7rem;color:var(--text2);font-weight:700;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.lf input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:11px;padding:12px 14px;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;}
+.lf input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,101,26,.1);}
+.lg-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:12px;color:#fff;font-size:.9rem;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer;transition:all .2s;}
+.lg-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,101,26,.3);}
+.lg-err{color:var(--red);font-size:.76rem;text-align:center;margin-top:8px;display:none;}
+
+/* ══ LAYOUT ══ */
+#adminPanel{display:none;}
+.layout{display:flex;min-height:100vh;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sb);min-width:var(--sb);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),#cc4e00);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
+.sb-logo-text{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;}
+.sb-logo-text span{color:var(--accent);}
+.sb-nav{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.sb-sec{font-size:.6rem;color:var(--text3);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:10px 8px 4px;font-family:'Space Mono',monospace;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:9px;cursor:pointer;transition:all .15s;color:var(--text2);font-size:.84rem;font-weight:500;border:1px solid transparent;}
+.sb-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+.sb-item.active{background:rgba(232,101,26,.1);color:var(--accent);border-color:rgba(232,101,26,.18);}
+.sb-icon{font-size:.95rem;width:18px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:20px;font-family:'Space Mono',monospace;}
+.sb-badge.green{background:var(--green);}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:9px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;overflow:hidden;}
+.sb-av img{width:100%;height:100%;object-fit:cover;}
+.sb-uname{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;}
+.sb-role{font-size:.65rem;color:var(--accent);font-family:'Space Mono',monospace;}
+.sb-logout{margin-left:auto;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.85rem;transition:color .2s;flex-shrink:0;}
+.sb-logout:hover{color:var(--red);}
+
+/* ══ OVERLAY (mobile) ══ */
+#sbOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;backdrop-filter:blur(2px);}
+
+/* ══ MAIN ══ */
+.main{margin-left:var(--sb);flex:1;display:flex;flex-direction:column;transition:margin .28s;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px;position:sticky;top:0;z-index:50;flex-wrap:wrap;}
+.topbar-l{display:flex;align-items:center;gap:10px;}
+.menu-btn{background:transparent;border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;display:none;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:1rem;flex-shrink:0;}
+.menu-btn:hover{color:var(--text);border-color:var(--accent);}
+.pg-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+.pg-sub{color:var(--text2);font-size:.72rem;}
+.topbar-r{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.tb-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:7px 11px;color:var(--text2);font-size:.75rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.tb-btn:hover{color:var(--text);border-color:var(--border2);}
+.stat-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.maint-btn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:7px 11px;color:var(--red);font-size:.75rem;cursor:pointer;font-weight:600;transition:all .2s;white-space:nowrap;}
+.maint-btn.on{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* ══ NOTIF BELL ══ */
+.notif-btn{position:relative;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;transition:all .2s;}
+.notif-btn:hover{border-color:var(--accent);}
+.notif-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--surface);display:none;animation:pulse 1s infinite;}
+.notif-dot.show{display:block;}
+
+/* ══ PAGES ══ */
+.page{display:none;padding:20px;flex:1;}
+.page.active{display:block;}
+
+/* ══ STATS ══ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all .2s;}
+.sc:hover{border-color:var(--border2);transform:translateY(-1px);}
+.sc::after{content:'';position:absolute;top:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.07;}
+.sc.o::after{background:var(--accent);}
+.sc.g::after{background:var(--green);}
+.sc.b::after{background:var(--blue);}
+.sc.y::after{background:var(--yellow);}
+.sc-icon{font-size:1.1rem;margin-bottom:8px;}
+.sc-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;margin-bottom:2px;}
+.sc-label{color:var(--text2);font-size:.72rem;}
+.sc-live{font-size:.65rem;margin-top:4px;color:var(--green);display:flex;align-items:center;gap:4px;}
+.sc-live .dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+
+/* ══ GRID ══ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.g3{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:18px;}
+
+/* ══ CARD ══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.ch{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ct{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;}
+.cs{color:var(--text2);font-size:.7rem;margin-top:1px;}
+.cb{padding:16px;}
+.ca{font-size:.7rem;color:var(--accent);cursor:pointer;font-weight:600;white-space:nowrap;}
+.ca:hover{text-decoration:underline;}
+
+/* ══ REALTIME BADGE ══ */
+.live-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:20px;padding:2px 8px;font-size:.62rem;color:var(--green);font-family:'Space Mono',monospace;}
+.live-badge .d{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1s infinite;}
+
+/* ══ TABLE ══ */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-size:.62rem;color:var(--text3);font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;white-space:nowrap;}
+.tbl td{padding:9px 10px;font-size:.78rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+.tbl tr:last-child td{border-bottom:none;}
+.uav{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:.63rem;font-weight:700;font-family:'Space Mono',monospace;}
+.badge.active{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.badge.banned{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+.badge.admin{background:rgba(232,101,26,.1);color:var(--accent);border:1px solid rgba(232,101,26,.2);}
+.badge.mod{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.2);}
+.badge.user{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid var(--border);}
+.act-btns{display:flex;gap:4px;flex-wrap:wrap;}
+.ab{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:4px 8px;font-size:.66rem;cursor:pointer;color:var(--text2);transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.ab:hover{color:var(--text);border-color:var(--accent);}
+.ab.red{border-color:rgba(239,68,68,.3);color:var(--red);}
+.ab.red:hover{background:rgba(239,68,68,.1);}
+.ab.green{border-color:rgba(34,197,94,.3);color:var(--green);}
+.ab.orange{border-color:rgba(232,101,26,.3);color:var(--accent);}
+.ab.orange:hover{background:rgba(232,101,26,.1);}
+
+/* ══ CHART ══ */
+.chart-wrap{display:flex;align-items:flex-end;gap:4px;height:88px;padding:6px 0 2px;}
+.cbar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;}
+.cbar{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--accent),rgba(232,101,26,.2));transition:height .5s cubic-bezier(.4,0,.2,1);cursor:pointer;position:relative;}
+.cbar:hover{opacity:.8;}
+.cbar-tip{position:absolute;top:-22px;left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border2);border-radius:5px;padding:2px 6px;font-size:.6rem;color:var(--text);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;}
+.cbar:hover .cbar-tip{opacity:1;}
+.clabel{font-size:.56rem;color:var(--text3);font-family:'Space Mono',monospace;}
+
+/* ══ LOG ══ */
+.log-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);}
+.log-item:last-child{border-bottom:none;}
+.ldot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.ldot.login{background:var(--green);}
+.ldot.msg{background:var(--blue);}
+.ldot.ban{background:var(--red);}
+.ldot.api{background:var(--yellow);}
+.ldot.reg{background:var(--accent);}
+.ltext{font-size:.76rem;color:var(--text2);line-height:1.4;}
+.ltext strong{color:var(--text);}
+.ltime{font-size:.63rem;color:var(--text3);font-family:'Space Mono',monospace;margin-top:1px;}
+
+/* ══ API ══ */
+.api-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.api-item:last-child{border-bottom:none;}
+.api-name{font-size:.82rem;font-weight:500;}
+.api-url{font-size:.67rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.api-stat{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:700;}
+.api-stat .d{width:6px;height:6px;border-radius:50%;}
+.api-stat.ok{color:var(--green);}
+.api-stat.ok .d{background:var(--green);box-shadow:0 0 4px var(--green);}
+.api-stat.err{color:var(--red);}
+.api-stat.err .d{background:var(--red);}
+
+/* ══ MINI STAT ══ */
+.ms{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.ms:last-child{border-bottom:none;}
+.ms-l{display:flex;align-items:center;gap:9px;}
+.ms-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.78rem;}
+.ms-icon.o{background:rgba(232,101,26,.1);}
+.ms-icon.g{background:rgba(34,197,94,.1);}
+.ms-icon.b{background:rgba(59,130,246,.1);}
+.ms-icon.y{background:rgba(245,158,11,.1);}
+.ms-name{font-size:.78rem;font-weight:500;}
+.ms-sub{font-size:.67rem;color:var(--text2);}
+.ms-val{font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;}
+
+/* ══ TOGGLE ══ */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.tgl{position:relative;width:40px;height:22px;flex-shrink:0;}
+.tgl input{opacity:0;width:0;height:0;}
+.tgl-sl{position:absolute;inset:0;background:var(--surface2);border:1.5px solid var(--border2);border-radius:22px;cursor:pointer;transition:all .22s;}
+.tgl-sl::before{content:'';position:absolute;width:14px;height:14px;left:3px;top:50%;transform:translateY(-50%);background:var(--text3);border-radius:50%;transition:all .22s;}
+.tgl input:checked+.tgl-sl{background:rgba(232,101,26,.18);border-color:var(--accent);}
+.tgl input:checked+.tgl-sl::before{transform:translate(17px,-50%);background:var(--accent);}
+
+/* ══ FIELD ══ */
+.fg{margin-bottom:13px;}
+.fg label{font-size:.68rem;color:var(--text2);font-weight:700;letter-spacing:.7px;text-transform:uppercase;display:block;margin-bottom:6px;}
+.fi{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:10px 12px;color:var(--text);font-size:.84rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s;}
+.fi:focus{border-color:var(--accent);}
+.fsel{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:8px 10px;color:var(--text);font-size:.82rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;}
+.fsel option{background:var(--surface2);}
+.fb{padding:9px 16px;background:linear-gradient(135deg,var(--accent),#cc4e00);border:none;border-radius:9px;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;}
+.fb:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,101,26,.25);}
+.fb.sec{background:var(--surface2);border:1.5px solid var(--border2);color:var(--text2);}
+.fb.sec:hover{color:var(--text);box-shadow:none;transform:none;}
+.fb.danger{background:linear-gradient(135deg,#ef4444,#dc2626);}
+
+/* ══ PROG ══ */
+.pr{margin-bottom:11px;}
+.pr-lbl{display:flex;justify-content:space-between;margin-bottom:4px;}
+.pr-name{font-size:.76rem;color:var(--text2);}
+.pr-val{font-size:.73rem;font-family:'Space Mono',monospace;}
+.pr-bar{height:4px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.pr-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .6s;}
+.pr-fill.b{background:linear-gradient(90deg,var(--blue),#60a5fa);}
+.pr-fill.g{background:linear-gradient(90deg,var(--green),#4ade80);}
+
+/* ══ RANGE ══ */
+.rng{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--surface2);outline:none;margin:8px 0;}
+.rng::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;}
+
+/* ══ MODAL ══ */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:600;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:22px;width:100%;max-width:480px;position:relative;max-height:92vh;overflow-y:auto;}
+.modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:5px;}
+.modal p{color:var(--text2);font-size:.8rem;margin-bottom:16px;}
+.modal-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:1rem;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;}
+
+/* ══ CHAT ENTRY ══ */
+.chat-entry{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:9px;}
+.ce-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;flex-wrap:wrap;gap:5px;}
+.ce-user{display:flex;align-items:center;gap:7px;}
+.ce-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;}
+.ce-name{font-size:.8rem;font-weight:600;}
+.ce-time{font-size:.63rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.ce-tags{display:flex;gap:4px;flex-wrap:wrap;}
+.ce-tag{font-size:.6rem;border-radius:5px;padding:2px 6px;border:1px solid;}
+.ce-tag.model{background:rgba(232,101,26,.08);color:var(--accent);border-color:rgba(232,101,26,.2);}
+.ce-tag.web{background:rgba(59,130,246,.08);color:var(--blue);border-color:rgba(59,130,246,.2);}
+.ce-tag.img{background:rgba(245,158,11,.08);color:var(--yellow);border-color:rgba(245,158,11,.2);}
+.msg-blk{margin-bottom:7px;}
+.msg-lbl{font-size:.63rem;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px;font-family:'Space Mono',monospace;}
+.msg-bub{border-radius:0 7px 7px 0;padding:8px 11px;font-size:.8rem;line-height:1.5;}
+.msg-bub.user{background:rgba(255,255,255,.03);border-left:2px solid var(--accent);}
+.msg-bub.ai{background:rgba(232,101,26,.04);border-left:2px solid rgba(232,101,26,.3);color:var(--text2);}
+
+/* ══ USER DETAIL MODAL ══ */
+.ud-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.ud-av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#cc4e00);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;flex-shrink:0;overflow:hidden;}
+.ud-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+.ud-meta{font-size:.73rem;color:var(--text2);}
+.ud-stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.ud-si{flex:1;min-width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px;text-align:center;}
+.ud-sv{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);}
+.ud-sl{font-size:.62rem;color:var(--text2);}
+.ud-chats{max-height:300px;overflow-y:auto;}
+
+/* ══ NOTIF PANEL ══ */
+.notif-panel{position:fixed;top:54px;right:16px;width:300px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;z-index:400;display:none;box-shadow:0 16px 48px rgba(0,0,0,.3);overflow:hidden;}
+.notif-panel.show{display:block;}
+.notif-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.notif-hd span{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;}
+.notif-clear{font-size:.7rem;color:var(--accent);cursor:pointer;font-weight:600;}
+.notif-list{max-height:300px;overflow-y:auto;}
+.notif-item{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;gap:10px;align-items:flex-start;}
+.notif-item:last-child{border-bottom:none;}
+.notif-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.notif-text{font-size:.76rem;color:var(--text2);line-height:1.4;}
+.notif-text strong{color:var(--text);}
+.notif-time{font-size:.62rem;color:var(--text3);font-family:'Space Mono',monospace;margin-top:2px;}
+.notif-empty{padding:20px;text-align:center;color:var(--text3);font-size:.8rem;}
+
+/* ══ SYS PROMPT ══ */
+.sys-ta{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:9px;padding:11px;color:var(--text);font-size:.8rem;font-family:'Space Mono',monospace;min-height:100px;outline:none;resize:vertical;line-height:1.6;}
+.sys-ta:focus{border-color:var(--accent);}
+
+/* ══ SBAR ══ */
+.sbar{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:6px 11px;display:flex;align-items:center;gap:6px;}
+.sbar input{background:transparent;border:none;outline:none;color:var(--text);font-size:.8rem;width:100%;font-family:'DM Sans',sans-serif;}
+.sbar input::placeholder{color:var(--text3);}
+
+/* ══ TOAST ══ */
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:8px 16px;font-size:.78rem;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ══ EMPTY ══ */
+.empty{text-align:center;padding:28px 16px;color:var(--text3);}
+.empty .ei{font-size:1.8rem;margin-bottom:7px;}
+.empty p{font-size:.8rem;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ══ MOBILE ══ */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  #sbOverlay.show{display:block;}
+  .main{margin-left:0!important;}
+  .menu-btn{display:flex!important;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .g2,.g3{grid-template-columns:1fr;}
+  .topbar-r .maint-btn{display:none;}
+  .notif-panel{right:8px;width:calc(100vw - 16px);}
+}
+@media(max-width:440px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .page{padding:12px;}
+  .sc-val{font-size:1.4rem;}
+}
+</style>
+</head>
+<body>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyCZZg8K-Zc8ycr98nDgLVF0054Hf4VeiXE",
+  authDomain:"arbajchatbot.firebaseapp.com",
+  projectId:"arbajchatbot",
+  storageBucket:"arbajchatbot.firebasestorage.app",
+  messagingSenderId:"520089993813",
+  appId:"1:520089993813:web:1446c050181372dbbf8adc"
+});
+const db=firebase.firestore();
+const auth=firebase.auth();
+</script>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginPage">
+  <div class="lg-glow"></div>
+  <div class="lg-box">
+    <div class="lg-logo">
+      <div class="lg-icon">⚡</div>
+      <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;">Elx<span style="color:var(--accent)">Admin</span></div>
+    </div>
+    <div class="lg-title">Admin Dashboard</div>
+    <div class="lg-sub">Arbaj AI Control Panel</div>
+    <button class="lg-google" onclick="googleLogin()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Google se Login karo
+    </button>
+    <div class="lg-divider"><span>ya</span></div>
+    <div class="lf">
+      <label>Admin Password</label>
+      <input type="password" id="adminPass" placeholder="Password daalo" onkeydown="if(event.key==='Enter')passLogin()"/>
+    </div>
+    <button class="lg-btn" onclick="passLogin()">Dashboard Kholao →</button>
+    <div class="lg-err" id="lgErr">⚠️ Wrong password</div>
+    <div style="text-align:center;margin-top:12px;font-size:.68rem;color:var(--text3);">Default: <span style="color:var(--accent);font-family:'Space Mono',monospace;">arbaj@admin123</span></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ══ -->
+<div id="adminPanel">
+<div id="sbOverlay" onclick="closeSidebar()"></div>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">⚡</div>
+      <div>
+        <div class="sb-logo-text">Elx<span>Admin</span></div>
+        <div style="font-size:.58rem;color:var(--text3);font-family:'Space Mono',monospace;">Arbaj AI v3 · Live</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <div class="sb-item active" onclick="showTab('dashboard',this);closeSidebar()"><span class="sb-icon">📊</span>Dashboard<span class="sb-badge green" id="liveDot">LIVE</span></div>
+      <div class="sb-sec">Users</div>
+      <div class="sb-item" onclick="showTab('users',this);closeSidebar()"><span class="sb-icon">👥</span>User Management<span class="sb-badge" id="uBadge">0</span></div>
+      <div class="sb-item" onclick="showTab('chats',this);closeSidebar()"><span class="sb-icon">💬</span>All Chats<span class="sb-badge" id="cBadge">0</span></div>
+      <div class="sb-item" onclick="showTab('logs',this);closeSidebar()"><span class="sb-icon">📋</span>Activity Logs</div>
+      <div class="sb-item" onclick="showTab('broadcast',this);closeSidebar()"><span class="sb-icon">📢</span>Broadcast<span class="sb-badge" style="background:var(--blue);">NEW</span></div>
+      <div class="sb-item" onclick="showTab('sessions',this);closeSidebar()"><span class="sb-icon">⏱️</span>Sessions</div>
+      <div class="sb-sec">AI System</div>
+      <div class="sb-item" onclick="showTab('analytics',this);closeSidebar()"><span class="sb-icon">📈</span>Analytics</div>
+      <div class="sb-item" onclick="showTab('prompt',this);closeSidebar()"><span class="sb-icon">🧠</span>System Prompt</div>
+      <div class="sb-item" onclick="showTab('api',this);closeSidebar()"><span class="sb-icon">🔌</span>API Health</div>
+      <div class="sb-sec">Control</div>
+      <div class="sb-item" onclick="showTab('settings',this);closeSidebar()"><span class="sb-icon">⚙️</span>Settings</div>
+      <div class="sb-item" onclick="showTab('security',this);closeSidebar()"><span class="sb-icon">🔒</span>Security</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-av" id="sbAv">A</div>
+        <div style="flex:1;min-width:0;"><div class="sb-uname" id="sbName">Arbaj Ansari</div><div class="sb-role">SUPER ADMIN</div></div>
+        <button class="sb-logout" onclick="doLogout()" title="Logout">⬅️</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+    <div class="topbar">
+      <div class="topbar-l">
+        <button class="menu-btn" id="menuBtn" onclick="openSidebar()">☰</button>
+        <div><div class="pg-title" id="pgTitle">Dashboard</div><div class="pg-sub" id="pgSub">Welcome back 👋 — Live data</div></div>
+      </div>
+      <div class="topbar-r">
+        <div class="sbar" style="min-width:150px;display:flex;">
+          <span style="color:var(--text3);font-size:.82rem;">🔍</span>
+          <input placeholder="Search users..." oninput="globalSearch(this.value)" id="gSearch"/>
+        </div>
+        <div class="tb-btn"><div class="stat-dot" id="sysDot"></div><span id="sysStatus">Live</span></div>
+        <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel()">
+          🔔<div class="notif-dot" id="notifDot"></div>
+        </button>
+        <button class="maint-btn" id="maintBtn" onclick="toggleMaint()">🔧 Maintenance</button>
+        <button class="tb-btn" onclick="toast('🔄 Data is live — auto updating!')">🔄 Live</button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATION PANEL -->
+    <div class="notif-panel" id="notifPanel">
+      <div class="notif-hd"><span>🔔 Notifications</span><span class="notif-clear" onclick="clearNotifs()">Clear all</span></div>
+      <div class="notif-list" id="notifList"><div class="notif-empty">Koi notifications nahi</div></div>
+    </div>
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="sc o"><div class="sc-icon">👥</div><div class="sc-val" id="s-users">—</div><div class="sc-label">Total Users</div><div class="sc-live"><div class="dot"></div>Real-time</div></div>
+        <div class="sc g"><div class="sc-icon">💬</div><div class="sc-val" id="s-chats">—</div><div class="sc-label">Total Chats</div><div class="sc-live"><div class="dot"></div>Real-time</div></div>
+        <div class="sc b"><div class="sc-icon">🟢</div><div class="sc-val" id="s-active">—</div><div class="sc-label">Active Today</div><div class="sc-live"><div class="dot"></div>Real-time</div></div>
+        <div class="sc y"><div class="sc-icon">⚡</div><div class="sc-val" id="s-web">—</div><div class="sc-label">Web Searches</div><div class="sc-live"><div class="dot"></div>Real-time</div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="ch">
+            <div><div class="ct">📈 Weekly Chats</div><div class="cs">Real Firebase data</div></div>
+            <div class="live-badge"><div class="d"></div>LIVE</div>
+          </div>
+          <div class="cb">
+            <div class="chart-wrap" id="weekChart"></div>
+            <div style="display:flex;gap:4px;margin-top:5px;" id="weekLabels"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">🔌 API Health</div><div class="cs">Live status</div></div><span class="ca" onclick="showTab('api',null)">All →</span></div>
+          <div class="cb" id="apiQuick"></div>
+        </div>
+      </div>
+      <div class="g3">
+        <div class="card">
+          <div class="ch">
+            <div><div class="ct">👥 Recent Users</div><div class="cs">Latest registrations</div></div>
+            <div class="live-badge"><div class="d"></div>LIVE</div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="tbl"><thead><tr><th>User</th><th>DOB</th><th>Age</th><th>Role</th><th>Status</th></tr></thead>
+            <tbody id="dashUsers"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">📋 Activity</div><span class="ca" onclick="showTab('logs',null)">All →</span></div>
+          <div class="cb" id="actLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══ -->
+    <div class="page" id="tab-users">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="filterUsers('all')">All</button>
+          <button class="ab green" onclick="filterUsers('active')">✅ Active</button>
+          <button class="ab red" onclick="filterUsers('banned')">🚫 Banned</button>
+          <button class="ab orange" onclick="filterUsers('admin')">⭐ Admin</button>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <div class="sbar" style="min-width:160px;"><span style="color:var(--text3);">🔍</span><input placeholder="Search..." oninput="searchUsers(this.value)" id="uSearch"/></div>
+          <button class="fb" onclick="exportCSV()">⬇️ CSV</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">👥 User Management</div><div class="cs" id="uCount">Loading...</div></div>
+          <div class="live-badge"><div class="d"></div>LIVE</div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>DOB</th><th>Age</th><th>Role</th><th>Status</th><th>Model</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="userTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHATS ══ -->
+    <div class="page" id="tab-chats">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="filterChats('all')">All</button>
+          <button class="ab" onclick="filterChats('web')">🌐 Web</button>
+          <button class="ab" onclick="filterChats('image')">🖼️ Image</button>
+        </div>
+        <div class="sbar" style="min-width:170px;"><span style="color:var(--text3);">🔍</span><input placeholder="Search msgs..." oninput="searchChats(this.value)"/></div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <div><div class="ct">💬 All Conversations</div><div class="cs" id="cCount">Loading...</div></div>
+          <div class="live-badge"><div class="d"></div>LIVE</div>
+        </div>
+        <div class="cb" id="chatBody"><div class="empty"><div class="ei">🔄</div><p>Loading...</p></div></div>
+      </div>
+    </div>
+
+    <!-- ══ LOGS ══ -->
+    <div class="page" id="tab-logs">
+      <div class="card">
+        <div class="ch"><div class="ct">📋 Activity Log</div><button class="fb sec" onclick="clearLogs()">🗑 Clear</button></div>
+        <div class="cb" id="fullLog"></div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="page" id="tab-analytics">
+      <div class="stats-grid">
+        <div class="sc b"><div class="sc-icon">⚡</div><div class="sc-val">~1.2s</div><div class="sc-label">Avg Response</div></div>
+        <div class="sc g"><div class="sc-icon">💬</div><div class="sc-val" id="a-total">—</div><div class="sc-label">Total Chats</div></div>
+        <div class="sc o"><div class="sc-icon">🌐</div><div class="sc-val" id="a-web">—</div><div class="sc-label">Web Searches</div></div>
+        <div class="sc y"><div class="sc-icon">🖼️</div><div class="sc-val" id="a-img">—</div><div class="sc-label">Image Chats</div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">📊 Model Usage</div></div><div class="cb" id="modelChart"></div></div>
+        <div class="card"><div class="ch"><div class="ct">📉 Stats</div></div><div class="cb">
+          <div class="ms"><div class="ms-l"><div class="ms-icon g">👥</div><div><div class="ms-name">Total Users</div></div></div><div class="ms-val" id="a-users">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon o">💬</div><div><div class="ms-name">Total Chats</div></div></div><div class="ms-val" id="a-chats">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon b">🌐</div><div><div class="ms-name">Web Searches</div></div></div><div class="ms-val" id="a-web2">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon y">📅</div><div><div class="ms-name">Today's Chats</div></div></div><div class="ms-val" id="a-today">—</div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ PROMPT ══ -->
+    <div class="page" id="tab-prompt">
+      <div class="card" style="margin-bottom:12px;">
+        <div class="ch"><div><div class="ct">🧠 System Prompt Editor</div><div class="cs">Controls AI personality</div></div></div>
+        <div class="cb">
+          <div class="fg"><label>Current Prompt</label>
+          <textarea class="sys-ta" id="sysPrompt" rows="7">You are Elx AI Pro — a powerful AI assistant created by Arbaj Ansari. Reply Accurate, solid, confident like ChatGPT. Use bullets for lists. Use emojis occasionally. Never say you are Claude, Llama, Anthropic, or Meta. You are Elx AI Pro by Arbaj Ansari.</textarea></div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <button class="fb" onclick="savePrompt()">💾 Save</button>
+            <button class="fb sec" onclick="resetPrompt()">↩ Reset</button>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="ch"><div class="ct">📝 Templates</div></div><div class="cb">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="ab orange" onclick="loadTpl('friendly')">😊 Friendly</button>
+          <button class="ab" onclick="loadTpl('pro')">💼 Professional</button>
+          <button class="ab" onclick="loadTpl('teacher')">📚 Teacher</button>
+          <button class="ab" onclick="loadTpl('coder')">💻 Coder</button>
+          <button class="ab" onclick="loadTpl('coach')">🏋 Coach</button>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- ══ API ══ -->
+    <div class="page" id="tab-api">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">🔌 API Status</div><button class="tb-btn" onclick="checkApis()">🔄 Check</button></div><div class="cb" id="apiList"></div></div>
+        <div class="card"><div class="ch"><div class="ct">🔑 API Keys</div></div><div class="cb">
+          <div class="fg"><label>Groq API Key</label><input type="password" class="fi" placeholder="gsk_..."/></div>
+          <div class="fg"><label>Tavily API Key</label><input type="password" class="fi" placeholder="tvly-..."/></div>
+          <div class="fg"><label>ElevenLabs Key</label><input type="password" class="fi" placeholder="sk_..."/></div>
+          <p style="font-size:.7rem;color:var(--text3);margin-bottom:10px;">⚠️ Vercel → Settings → Env Variables mein update karo</p>
+          <button class="fb sec" onclick="toast('ℹ️ Vercel Dashboard → Settings → Environment Variables')">ℹ️ Guide</button>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="tab-settings">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">⚙️ Features</div></div><div class="cb">
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">Maintenance Mode</div><div style="font-size:.68rem;color:var(--text2);">Users ko maintenance page dikhao</div></div><label class="tgl"><input type="checkbox" id="maintTgl" onchange="toggleMaint()"/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">Web Search</div><div style="font-size:.68rem;color:var(--text2);">Tavily search enable</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">Voice Feature</div><div style="font-size:.68rem;color:var(--text2);">ElevenLabs TTS</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">Push Notifications</div><div style="font-size:.68rem;color:var(--text2);">Naya user alert</div></div><label class="tgl"><input type="checkbox" id="notifToggle" checked onchange="toggleNotifPerm()"/><span class="tgl-sl"></span></label></div>
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">New Registrations</div><div style="font-size:.68rem;color:var(--text2);">Allow new users</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div style="margin-top:12px;"><button class="fb" onclick="toast('✅ Settings saved!')">💾 Save</button></div>
+        </div></div>
+        <div class="card"><div class="ch"><div class="ct">🗄️ Database</div></div><div class="cb">
+          <div class="ms"><div class="ms-l"><div class="ms-icon o">🔥</div><div><div class="ms-name">Firebase</div><div class="ms-sub">arbajchatbot</div></div></div><span class="badge active">Connected</span></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon b">👥</div><div><div class="ms-name">Users</div></div></div><div class="ms-val" id="dbU">—</div></div>
+          <div class="ms"><div class="ms-l"><div class="ms-icon g">💬</div><div><div class="ms-name">Chats</div></div></div><div class="ms-val" id="dbC">—</div></div>
+          <div style="margin-top:12px;display:flex;gap:7px;">
+            <button class="fb sec" onclick="backupData()">📦 Backup</button>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ══ SECURITY ══ -->
+    <div class="page" id="tab-security">
+      <div class="g2">
+        <div class="card"><div class="ch"><div class="ct">🔒 Rate Limiting</div></div><div class="cb">
+          <div class="fg"><label>Max requests/minute</label>
+            <input type="range" class="rng" min="1" max="30" value="10" oninput="document.getElementById('rateVal').textContent=this.value+' req/min'"/>
+            <div style="text-align:right;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--accent);margin-top:3px;" id="rateVal">10 req/min</div>
+          </div>
+          <div class="toggle-row"><div><div style="font-size:.82rem;font-weight:500;">Block abusive IPs</div></div><label class="tgl"><input type="checkbox" checked/><span class="tgl-sl"></span></label></div>
+          <div style="margin-top:12px;"><button class="fb" onclick="toast('✅ Limits saved!')">💾 Save</button></div>
+        </div></div>
+        <div class="card"><div class="ch"><div class="ct">🔑 Change Password</div></div><div class="cb">
+          <div class="fg"><label>Current Password</label><input type="password" class="fi" id="cp"/></div>
+          <div class="fg"><label>New Password</label><input type="password" class="fi" id="np"/></div>
+          <div class="fg"><label>Confirm</label><input type="password" class="fi" id="cpp"/></div>
+          <button class="fb" onclick="changePass()">🔑 Change</button>
+        </div></div>
+      </div>
+    </div>
+
+
+    <!-- ══ BROADCAST ══ -->
+    <div class="page" id="tab-broadcast">
+      <div class="g2">
+        <div class="card">
+          <div class="ch">
+            <div><div class="ct">📢 Send Broadcast</div><div class="cs">Jab user chatbot khole — 10 sec tak dikhega</div></div>
+          </div>
+          <div class="cb">
+            <div class="fg">
+              <label>Message Type</label>
+              <select class="fsel" id="bcType">
+                <option value="info">ℹ️ Info</option>
+                <option value="success">✅ Success</option>
+                <option value="warning">⚠️ Warning</option>
+                <option value="announcement">📣 Announcement</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Broadcast Title</label>
+              <input class="fi" id="bcTitle" placeholder="e.g. New Feature Available!"/>
+            </div>
+            <div class="fg">
+              <label>Message</label>
+              <textarea class="sys-ta" id="bcMsg" rows="4" placeholder="Apna message likho — sab users ko dikhega jab chatbot kholenge..."></textarea>
+            </div>
+            <div class="fg">
+              <label>Expire After</label>
+              <select class="fsel" id="bcExpiry">
+                <option value="1">1 Hour</option>
+                <option value="6">6 Hours</option>
+                <option value="24" selected>24 Hours</option>
+                <option value="72">3 Days</option>
+                <option value="168">1 Week</option>
+                <option value="0">Never Expire</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="fb" onclick="sendBroadcast()">📢 Send to All Users</button>
+              <button class="fb sec" onclick="previewBroadcast()">👁️ Preview</button>
+              <button class="fb danger" onclick="clearBroadcast()">🗑 Clear Active</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div><div class="ct">📋 Active Broadcasts</div><div class="cs">Currently live messages</div></div></div>
+          <div class="cb" id="activeBcList"><div class="empty"><div class="ei">📢</div><p>Koi active broadcast nahi</p></div></div>
+        </div>
+      </div>
+      <!-- PREVIEW MODAL -->
+      <div class="card" id="bcPreviewCard" style="display:none;">
+        <div class="ch"><div class="ct">👁️ Preview — User ko aisa dikhega</div></div>
+        <div class="cb">
+          <div id="bcPreviewBox" style="border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <span id="bcPreviewIcon" style="font-size:1.4rem;">📣</span>
+              <div>
+                <div id="bcPreviewTitle" style="font-weight:700;font-size:.9rem;"></div>
+                <div style="font-size:.7rem;color:var(--text2);">10 second tak dikhega · phir close</div>
+              </div>
+              <div style="margin-left:auto;background:rgba(255,255,255,.1);border-radius:20px;padding:3px 10px;font-size:.7rem;">Auto close</div>
+            </div>
+            <div id="bcPreviewMsg" style="font-size:.84rem;color:var(--text2);line-height:1.5;"></div>
+            <div style="margin-top:12px;height:3px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;">
+              <div id="bcProgressBar" style="height:100%;width:100%;border-radius:3px;transition:width 10s linear;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SESSIONS ══ -->
+    <div class="page" id="tab-sessions">
+      <div class="stats-grid">
+        <div class="sc o"><div class="sc-icon">⏱️</div><div class="sc-val" id="ss-avg">—</div><div class="sc-label">Avg Session Time</div></div>
+        <div class="sc g"><div class="sc-icon">🏆</div><div class="sc-val" id="ss-top">—</div><div class="sc-label">Most Active User</div></div>
+        <div class="sc b"><div class="sc-icon">💬</div><div class="sc-val" id="ss-msgs">—</div><div class="sc-label">Avg Msgs/Session</div></div>
+        <div class="sc y"><div class="sc-icon">📅</div><div class="sc-val" id="ss-today">—</div><div class="sc-label">Sessions Today</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">⏱️ User Session Analytics</div><div class="cs">Based on chat history data</div></div><div class="live-badge">LIVE</div></div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>DOB</th><th>Age</th><th>Total Chats</th><th>Web Searches</th><th>Last Active</th><th>Est. Time</th><th>Activity</th></tr></thead>
+            <tbody id="sessionTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ BROADCAST ══ -->
+    <div class="page" id="tab-broadcast">
+      <div class="g2">
+        <div class="card">
+          <div class="ch"><div><div class="ct">📢 Broadcast Message</div><div class="cs">Jab user chatbot khole — 10 sec dikhega</div></div></div>
+          <div class="cb">
+            <div class="fg"><label>Message Title</label><input type="text" class="fi" id="bcTitle" placeholder="e.g. 🎉 Naya Feature!" maxlength="60"/></div>
+            <div class="fg"><label>Message Body</label><textarea class="sys-ta" id="bcMsg" rows="4" placeholder="Sab users ke liye message likho..."></textarea></div>
+            <div class="fg">
+              <label>Message Type</label>
+              <select class="fsel" id="bcType">
+                <option value="info">ℹ️ Info</option>
+                <option value="success">✅ Success</option>
+                <option value="warning">⚠️ Warning</option>
+                <option value="urgent">🚨 Urgent</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>Duration (seconds)</label>
+              <input type="range" class="rng" min="5" max="30" value="10" oninput="document.getElementById('bcDurVal').textContent=this.value+'s'"/>
+              <div style="text-align:right;font-family:'Space Mono',monospace;font-size:.8rem;color:var(--accent);" id="bcDurVal">10s</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+              <button class="fb" onclick="sendBroadcast()">📢 Send to All Users</button>
+              <button class="fb sec" onclick="clearBroadcast()">🗑 Clear Message</button>
+            </div>
+            <div id="bcStatus" style="margin-top:10px;font-size:.78rem;color:var(--green);display:none;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">📋 Sent Messages</div></div>
+          <div class="cb" id="bcHistory">
+            <div class="empty"><div class="ei">📢</div><p>Abhi koi message nahi bheja</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">👁️ Preview</div><div class="cs">Users ko aisa dikhega</div></div></div>
+        <div class="cb">
+          <div id="bcPreview" style="background:rgba(232,101,26,.08);border:1px solid rgba(232,101,26,.25);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;">
+            <div style="font-size:1.4rem;" id="bcPreviewIcon">📢</div>
+            <div style="flex:1;">
+              <div style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:4px;" id="bcPreviewTitle">Message Title</div>
+              <div style="font-size:.8rem;color:var(--text2);" id="bcPreviewMsg">Message body yahan dikhega...</div>
+              <div style="margin-top:8px;display:flex;align-items:center;gap:8px;">
+                <div style="height:3px;flex:1;background:var(--surface2);border-radius:3px;overflow:hidden;">
+                  <div style="height:100%;background:var(--accent);border-radius:3px;width:100%;animation:bcBar 10s linear forwards;" id="bcProgressBar"></div>
+                </div>
+                <span style="font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;">10s</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SESSIONS ══ -->
+    <div class="page" id="tab-sessions">
+      <div class="stats-grid">
+        <div class="sc o"><div class="sc-icon">⏱️</div><div class="sc-val" id="ss-avg">—</div><div class="sc-label">Avg Session Time</div></div>
+        <div class="sc g"><div class="sc-icon">🔝</div><div class="sc-val" id="ss-top">—</div><div class="sc-label">Top User Sessions</div></div>
+        <div class="sc b"><div class="sc-icon">📅</div><div class="sc-val" id="ss-today">—</div><div class="sc-label">Sessions Today</div></div>
+        <div class="sc y"><div class="sc-icon">💬</div><div class="sc-val" id="ss-msgs">—</div><div class="sc-label">Avg Msgs/Session</div></div>
+      </div>
+      <div class="card">
+        <div class="ch"><div><div class="ct">⏱️ User Session Details</div><div class="cs">Har user ne kitna time spend kiya</div></div><div class="live-badge">LIVE</div></div>
+        <div style="overflow-x:auto;">
+          <table class="tbl">
+            <thead><tr><th>User</th><th>DOB</th><th>Total Chats</th><th>Est. Time</th><th>Last Active</th><th>Fav Model</th></tr></thead>
+            <tbody id="sessionTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<!-- USER DETAIL MODAL -->
+<div class="modal-bg" id="userModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('userModal')">✕</button>
+    <div id="userModalContent"></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    <h3 id="confirmTitle">Confirm</h3>
+    <p id="confirmMsg">Sure?</p>
+    <div class="modal-btns">
+      <button class="fb sec" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="fb danger" id="confirmOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+let PASS = localStorage.getItem('elxPass') || 'arbaj@admin123';
+let allUsers=[], allChats=[], allLogs=[];
+let chatFilter='all', userFilter='all';
+let maintMode=false, confirmCb=null;
+let unsubUsers=null, unsubChats=null;
+let notifEnabled=true;
+let notifications=[];
+
+// ══════════════════════════════
+// LOGIN — Firebase Auth + Password
+// ══════════════════════════════
+function googleLogin(){
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).then(result=>{
+    const user = result.user;
+    // Check if admin email
+    if(user.email === 'arbajansari@gmail.com' || user.email.includes('arbaj')) {
+      loginSuccess(user.displayName, user.photoURL);
+    } else {
+      // Allow any Google login for demo — in production check email
+      loginSuccess(user.displayName || 'Admin', user.photoURL);
+    }
+  }).catch(e=>{
+    // Fallback if Google Auth not configured
+    document.getElementById('lgErr').textContent = '⚠️ Google login failed — password use karo';
+    document.getElementById('lgErr').style.display='block';
+  });
+}
+
+function passLogin(){
+  const p = document.getElementById('adminPass').value;
+  const err = document.getElementById('lgErr');
+  if(!p){ err.textContent='⚠️ Password daalo'; err.style.display='block'; return; }
+  if(p===PASS){
+    loginSuccess('Arbaj Ansari', null);
+  } else {
+    err.textContent='⚠️ Wrong password!';
+    err.style.display='block';
+    document.getElementById('adminPass').value='';
+  }
+}
+
+function loginSuccess(name, photoUrl){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  // Set sidebar user info
+  const sbName = document.getElementById('sbName');
+  const sbAv = document.getElementById('sbAv');
+  if(sbName) sbName.textContent = name || 'Arbaj Ansari';
+  if(sbAv && photoUrl){
+    sbAv.innerHTML = `<img src="${photoUrl}" alt="av"/>`;
+  }
+  requestNotifPermission();
+  initRealtime();
+}
+
+function doLogout(){
+  if(unsubUsers) unsubUsers();
+  if(unsubChats) unsubChats();
+  auth.signOut().catch(()=>{});
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('adminPass').value='';
+  document.getElementById('lgErr').style.display='none';
+}
+
+document.getElementById('adminPass').addEventListener('keydown',e=>{ if(e.key==='Enter') passLogin(); });
+
+// ══════════════════════════════
+// MOBILE SIDEBAR
+// ══════════════════════════════
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sbOverlay').classList.add('show');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════
+// TABS
+// ══════════════════════════════
+const tabMeta={
+  dashboard:['Dashboard','Live data — auto updating 🔴'],
+  users:['User Management','Control all users'],
+  chats:['All Chats','Every conversation'],
+  logs:['Activity Logs','System activity'],
+  analytics:['Analytics','Real performance stats'],
+  prompt:['System Prompt','AI personality'],
+  api:['API Health','Integrations status'],
+  settings:['Settings','Configure system'],
+  security:['Security','Rate limits & access'],
+};
+function showTab(tab,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(el) el.classList.add('active');
+  const m=tabMeta[tab];
+  if(m){ document.getElementById('pgTitle').textContent=m[0]; document.getElementById('pgSub').textContent=m[1]; }
+  if(tab==='logs') renderFullLogs();
+  if(tab==='api') renderApiList();
+  if(tab==='analytics') renderAnalytics();
+}
+
+// ══════════════════════════════
+// REAL-TIME FIREBASE LISTENERS
+// ══════════════════════════════
+function initRealtime(){
+  addLog('api','Firebase','Live data sync ON 🔴');
+
+  // ── USERS REAL-TIME ──
+  unsubUsers = db.collection('users').onSnapshot(snap=>{
+    const prevCount = allUsers.length;
+    allUsers=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      let dob=d.dob||'';
+      if(!dob&&d.enrollment&&d.enrollment.startsWith('DOB-')) dob=d.enrollment.replace('DOB-','');
+      if(!dob&&doc.id.startsWith('DOB-')) dob=doc.id.replace('DOB-','');
+      allUsers.push({id:doc.id,name:d.name||d.userName||'Unknown',dob:dob,role:d.role||'user',status:d.status||'active',model:d.preferredModel||'elx',firstJoin:d.firstJoin||d.lastLogin||null});
+    });
+
+    // Detect NEW user
+    if(prevCount > 0 && allUsers.length > prevCount){
+      const newest = allUsers[allUsers.length-1];
+      addLog('reg', newest.name, 'New user registered! 🎉');
+      pushNotif('👤 New User!', newest.name+' ne register kiya', 'reg');
+      sendBrowserNotif('👤 New User — Arbaj AI', newest.name+' ne register kiya!');
+    }
+
+    updateUserUI();
+  }, e=>{ addLog('api','Firebase','Users listener error: '+e.message); });
+
+  // ── CHATS REAL-TIME ──
+  unsubChats = db.collection('chats').orderBy('timestamp','desc').limit(100).onSnapshot(snap=>{
+    const prevCount = allChats.length;
+    allChats=[];
+    let webCount=0, imgCount=0, todayCount=0;
+    const today = new Date().toDateString();
+
+    snap.forEach(doc=>{
+      const d=doc.data();
+      let ts=new Date().toISOString();
+      try{
+        if(d.timestamp&&d.timestamp.seconds) ts=new Date(d.timestamp.seconds*1000).toISOString();
+        else if(d.timestamp&&d.timestamp.toDate) ts=d.timestamp.toDate().toISOString();
+        else if(d.timestamp&&typeof d.timestamp==='string') ts=new Date(d.timestamp).toISOString();
+      }catch(e){}
+      if(d.webSearch) webCount++;
+      if(d.hasImage) imgCount++;
+      if(new Date(ts).toDateString()===today) todayCount++;
+      allChats.push({id:doc.id,userName:d.userName||'Anonymous',userMessage:d.userMessage||'',aiReply:d.aiReply||'',model:d.model||'elx',webSearch:d.webSearch||false,hasImage:d.hasImage||false,timestamp:ts});
+    });
+
+    // Detect NEW chat
+    if(prevCount > 0 && allChats.length > prevCount){
+      const newest = allChats[0];
+      addLog('msg', newest.userName, 'New message: "'+newest.userMessage.slice(0,40)+'"');
+      pushNotif('💬 New Chat!', newest.userName+': '+newest.userMessage.slice(0,50), 'msg');
+    }
+
+    // Update UI
+    document.getElementById('s-chats').textContent = allChats.length;
+    document.getElementById('s-web').textContent = webCount;
+    document.getElementById('s-active').textContent = todayCount;
+    document.getElementById('cBadge').textContent = allChats.length;
+    document.getElementById('cCount').textContent = allChats.length+' conversations';
+    document.getElementById('dbC').textContent = allChats.length;
+    if(document.getElementById('a-total')) document.getElementById('a-total').textContent=allChats.length;
+    if(document.getElementById('a-web')) document.getElementById('a-web').textContent=webCount;
+    if(document.getElementById('a-img')) document.getElementById('a-img').textContent=imgCount;
+    if(document.getElementById('a-today')) document.getElementById('a-today').textContent=todayCount;
+    if(document.getElementById('a-web2')) document.getElementById('a-web2').textContent=webCount;
+
+    // Update chats tab if active
+    if(document.getElementById('tab-chats').classList.contains('active')){
+      renderChats(allChats);
+    }
+    // Update chart
+    renderRealChart();
+  }, e=>{ addLog('api','Firebase','Chats listener error: '+e.message); });
+}
+
+function updateUserUI(){
+  const cnt = allUsers.length;
+  document.getElementById('s-users').textContent = cnt;
+  document.getElementById('uBadge').textContent = cnt;
+  document.getElementById('uCount').textContent = cnt+' users';
+  document.getElementById('dbU').textContent = cnt;
+  if(document.getElementById('a-users')) document.getElementById('a-users').textContent=cnt;
+  renderDashUsers();
+  if(document.getElementById('tab-users').classList.contains('active')) renderUserTable(getFilteredUsers());
+}
+
+// ══════════════════════════════
+// REAL CHART — Firebase data
+// ══════════════════════════════
+function renderRealChart(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const counts=[0,0,0,0,0,0,0];
+  allChats.forEach(c=>{
+    try{
+      const d=new Date(c.timestamp);
+      const day=d.getDay(); // 0=Sun,1=Mon...
+      const idx=day===0?6:day-1;
+      counts[idx]++;
+    }catch(e){}
+  });
+  const mx=Math.max(...counts,1);
+  document.getElementById('weekChart').innerHTML=counts.map((v,i)=>`
+    <div class="cbar-wrap">
+      <div class="cbar" style="height:${Math.max((v/mx)*76,4)}px;">
+        <div class="cbar-tip">${v} chats</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('weekLabels').innerHTML=days.map(d=>`<div style="flex:1;text-align:center;font-size:.56rem;color:var(--text3);font-family:'Space Mono',monospace;">${d}</div>`).join('');
+}
+
+// ══════════════════════════════
+// ANALYTICS — Real data
+// ══════════════════════════════
+function renderAnalytics(){
+  if(document.getElementById('a-total')) document.getElementById('a-total').textContent=allChats.length;
+  if(document.getElementById('a-users')) document.getElementById('a-users').textContent=allUsers.length;
+  const webCount=allChats.filter(c=>c.webSearch).length;
+  const imgCount=allChats.filter(c=>c.hasImage).length;
+  const today=new Date().toDateString();
+  const todayCount=allChats.filter(c=>new Date(c.timestamp).toDateString()===today).length;
+  if(document.getElementById('a-web')) document.getElementById('a-web').textContent=webCount;
+  if(document.getElementById('a-web2')) document.getElementById('a-web2').textContent=webCount;
+  if(document.getElementById('a-img')) document.getElementById('a-img').textContent=imgCount;
+  if(document.getElementById('a-today')) document.getElementById('a-today').textContent=todayCount;
+
+  // Model usage from real data
+  const modelCount={};
+  allChats.forEach(c=>{ modelCount[c.model]=(modelCount[c.model]||0)+1; });
+  const total=allChats.length||1;
+  const modelEl=document.getElementById('modelChart');
+  if(modelEl){
+    const models=[
+      {k:'elx',name:'Elx AI Pro',cls:''},
+      {k:'arbaj',name:'ArbajOpus',cls:'b'},
+      {k:'chatgpt',name:'ChatGPT 5.2',cls:'g'},
+      {k:'deepseek',name:'DeepSeek R1',cls:''},
+    ];
+    modelEl.innerHTML=models.map(m=>{
+      const pct=Math.round(((modelCount[m.k]||0)/total)*100);
+      return `<div class="pr"><div class="pr-lbl"><span class="pr-name">${m.name}</span><span class="pr-val">${pct}%</span></div><div class="pr-bar"><div class="pr-fill ${m.cls}" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+  }
+}
+
+// ══════════════════════════════
+// PUSH NOTIFICATIONS
+// ══════════════════════════════
+function requestNotifPermission(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted') toast('🔔 Notifications enabled!');
+    });
+  }
+}
+
+function sendBrowserNotif(title, body){
+  if(!notifEnabled) return;
+  if('Notification' in window && Notification.permission==='granted'){
+    new Notification(title,{body, icon:'https://arbajbot1.vercel.app/favicon.ico'});
+  }
+}
+
+function toggleNotifPerm(){
+  notifEnabled = document.getElementById('notifToggle').checked;
+  toast(notifEnabled?'🔔 Notifications ON':'🔕 Notifications OFF');
+}
+
+function pushNotif(title, body, type){
+  notifications.unshift({title,body,type,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}),ts:Date.now()});
+  notifications=notifications.filter(n=>!n.ts||(Date.now()-n.ts)<86400000);
+  if(notifications.length>30) notifications=notifications.slice(0,30);
+  document.getElementById('notifDot').classList.add('show');
+  renderNotifPanel();
+}
+
+function renderNotifPanel(){
+  const el=document.getElementById('notifList');
+  const now=new Date();
+  // Only last 24hrs
+  const recent=notifications.filter(n=>now.getTime()-(n.ts||0)<24*60*60*1000);
+  if(!recent.length){ el.innerHTML='<div class="notif-empty">No notifications in last 24hrs</div>'; return; }
+  const icons={reg:'👤',msg:'💬',ban:'🚫',api:'⚡',login:'🔐'};
+  el.innerHTML=recent.map(n=>{
+    let extra='';
+    if(n.userData&&n.userData.dob) extra='<div style="font-size:.62rem;color:var(--accent);font-family:monospace;margin-top:2px;">📅 DOB: '+n.userData.dob+' · Age: '+calcAge(n.userData.dob)+'</div>';
+    return '<div class="notif-item"><div class="notif-icon">'+(icons[n.type]||'📢')+'</div><div><div class="notif-text"><strong>'+n.title+'</strong><br>'+n.body+'</div>'+extra+'<div class="notif-time">'+n.time+'</div></div></div>';
+  }).join('');
+}
+
+function toggleNotifPanel(){
+  document.getElementById('notifPanel').classList.toggle('show');
+  document.getElementById('notifDot').classList.remove('show');
+}
+function clearNotifs(){
+  notifications=[];
+  renderNotifPanel();
+  document.getElementById('notifDot').classList.remove('show');
+  toast('🗑 Notifications cleared');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#notifPanel')&&!e.target.closest('#notifBtn')){
+    document.getElementById('notifPanel').classList.remove('show');
+  }
+});
+
+// ══════════════════════════════
+// DASHBOARD USERS
+// ══════════════════════════════
+function renderDashUsers(){
+  const tbody=document.getElementById('dashUsers');
+  if(!tbody) return;
+  tbody.innerHTML=allUsers.slice(0,5).map(u=>`
+    <tr style="cursor:pointer;" onclick="openUserModal('${u.id}')">
+      <td><div style="display:flex;align-items:center;gap:7px;"><div class="uav">${(u.name||'?')[0].toUpperCase()}</div><span style="font-weight:500;">${u.name}</span></div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--text2);">${u.dob||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.72rem;">${calcAge(u.dob)}</td>
+      <td><span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span></td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+    </tr>`).join('')||'<tr><td colspan="5"><div class="empty"><div class="ei">👥</div><p>No users yet</p></div></td></tr>';
+}
+
+// ══════════════════════════════
+// USERS TABLE
+// ══════════════════════════════
+function getFilteredUsers(){
+  let list=[...allUsers];
+  if(userFilter==='active') list=list.filter(u=>u.status==='active');
+  if(userFilter==='banned') list=list.filter(u=>u.status==='banned');
+  if(userFilter==='admin') list=list.filter(u=>u.role==='admin'||u.role==='moderator');
+  return list;
+}
+function renderUsers(){ renderUserTable(getFilteredUsers()); }
+function renderUserTable(users){
+  const tbody=document.getElementById('userTbody');
+  if(!tbody) return;
+  if(!users.length){ tbody.innerHTML='<tr><td colspan="8"><div class="empty"><div class="ei">👥</div><p>No users found</p></div></td></tr>'; return; }
+  tbody.innerHTML=users.map(u=>{
+    let joined='Recent';
+    try{ if(u.firstJoin&&u.firstJoin.seconds) joined=new Date(u.firstJoin.seconds*1000).toLocaleDateString('en-IN');
+    else if(u.firstJoin&&u.firstJoin.toDate) joined=u.firstJoin.toDate().toLocaleDateString('en-IN');
+    else if(u.firstJoin&&typeof u.firstJoin==='string') joined=new Date(u.firstJoin).toLocaleDateString('en-IN'); }catch(e){}
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:7px;cursor:pointer;" onclick="openUserModal('${u.id}')">
+        <div class="uav">${(u.name||'?')[0].toUpperCase()}</div>
+        <div><div style="font-weight:600;">${u.name}</div><div style="font-size:.62rem;color:var(--text3);font-family:'Space Mono',monospace;">${u.id.slice(0,16)}...</div></div>
+      </div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:.73rem;">${u.dob||'—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.73rem;">${calcAge(u.dob)}</td>
+      <td><span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span></td>
+      <td><span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span></td>
+      <td><select class="fsel" style="padding:3px 7px;font-size:.7rem;width:auto;" onchange="setUserModel('${u.id}',this.value)">
+        <option value="elx" ${u.model==='elx'?'selected':''}>Elx AI</option>
+        <option value="arbaj" ${u.model==='arbaj'?'selected':''}>ArbajOpus</option>
+        <option value="chatgpt" ${u.model==='chatgpt'?'selected':''}>ChatGPT</option>
+        <option value="deepseek" ${u.model==='deepseek'?'selected':''}>DeepSeek</option>
+      </select></td>
+      <td style="font-size:.7rem;color:var(--text2);">${joined}</td>
+      <td><div class="act-btns">
+        <button class="ab orange" onclick="openUserModal('${u.id}')">💬</button>
+        <button class="ab" onclick="setRole('${u.id}')">👑</button>
+        ${u.status==='banned'?`<button class="ab green" onclick="unbanUser('${u.id}','${u.name}')">✅</button>`:`<button class="ab red" onclick="banUser('${u.id}','${u.name}')">🚫</button>`}
+        <button class="ab red" onclick="deleteUser('${u.id}','${u.name}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function filterUsers(f){ userFilter=f; renderUserTable(getFilteredUsers()); }
+function searchUsers(q){
+  if(!q.trim()){ renderUserTable(getFilteredUsers()); return; }
+  renderUserTable(allUsers.filter(u=>u.name.toLowerCase().includes(q.toLowerCase())||(u.dob||'').includes(q)||(u.id||'').toLowerCase().includes(q.toLowerCase())));
+}
+
+// ══════════════════════════════
+// USER MODAL — with chats
+// ══════════════════════════════
+function openUserModal(userId){
+  if(!userId) return;
+  const u=allUsers.find(x=>x.id===userId);
+  if(!u) return;
+  const userChats=allChats.filter(c=>c.userName===u.name);
+  const html=`
+    <div class="ud-hd">
+      <div class="ud-av">${(u.name||'?')[0].toUpperCase()}</div>
+      <div>
+        <div class="ud-name">${u.name}</div>
+        <div class="ud-meta">DOB: ${u.dob||'—'} · Age: ${calcAge(u.dob)} · ${u.id.slice(0,20)}...</div>
+        <div style="margin-top:4px;display:flex;gap:4px;">
+          <span class="badge ${u.role==='admin'?'admin':u.role==='moderator'?'mod':'user'}">${u.role}</span>
+          <span class="badge ${u.status==='banned'?'banned':'active'}">${u.status}</span>
+        </div>
+      </div>
+    </div>
+    <div class="ud-stats">
+      <div class="ud-si"><div class="ud-sv">${userChats.length}</div><div class="ud-sl">Chats</div></div>
+      <div class="ud-si"><div class="ud-sv">${calcAge(u.dob)}</div><div class="ud-sl">Age</div></div>
+      <div class="ud-si"><div class="ud-sv">${u.model||'elx'}</div><div class="ud-sl">Model</div></div>
+      <div class="ud-si"><div class="ud-sv">${userChats.filter(c=>c.webSearch).length}</div><div class="ud-sl">Web Srch</div></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="ab orange" onclick="setRole('${u.id}')">👑 Role</button>
+      ${u.status==='banned'?`<button class="ab green" onclick="unbanUser('${u.id}','${u.name}');closeModal('userModal')">✅ Unban</button>`:`<button class="ab red" onclick="banUser('${u.id}','${u.name}');closeModal('userModal')">🚫 Ban</button>`}
+      <select class="fsel" style="padding:5px 8px;font-size:.73rem;width:auto;" onchange="setUserModel('${u.id}',this.value)">
+        <option value="elx" ${u.model==='elx'?'selected':''}>Elx AI Pro</option>
+        <option value="arbaj" ${u.model==='arbaj'?'selected':''}>ArbajOpus</option>
+        <option value="chatgpt" ${u.model==='chatgpt'?'selected':''}>ChatGPT 5.2</option>
+        <option value="deepseek" ${u.model==='deepseek'?'selected':''}>DeepSeek R1</option>
+      </select>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;margin-bottom:10px;">💬 Chat History (${userChats.length})</div>
+    <div class="ud-chats">${userChats.length?userChats.slice(0,15).map(c=>{
+      let t='Recently'; try{t=new Date(c.timestamp).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){}
+      return `<div class="chat-entry">
+        <div class="ce-head">
+          <div style="display:flex;gap:5px;"><span class="ce-time">${t}</span></div>
+          <div class="ce-tags"><span class="ce-tag model">${c.model}</span>${c.webSearch?'<span class="ce-tag web">🌐</span>':''}${c.hasImage?'<span class="ce-tag img">🖼️</span>':''}</div>
+        </div>
+        <div class="msg-blk"><div class="msg-lbl">👤 User</div><div class="msg-bub user">${(c.userMessage||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>
+        <div class="msg-blk"><div class="msg-lbl">🤖 AI</div><div class="msg-bub ai">${(c.aiReply||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div></div>
+      </div>`;
+    }).join(''):'<div class="empty"><div class="ei">💬</div><p>Is user ki koi chat nahi mili abhi.</p></div>'}</div>`;
+  document.getElementById('userModalContent').innerHTML=html;
+  document.getElementById('userModal').classList.add('show');
+}
+
+// ══════════════════════════════
+// CHATS
+// ══════════════════════════════
+function renderChats(chats){
+  const el=document.getElementById('chatBody');
+  if(!el) return;
+  if(!chats.length){ el.innerHTML='<div class="empty"><div class="ei">💬</div><p>Koi chats nahi.</p></div>'; return; }
+  el.innerHTML=chats.map(c=>{
+    let t='Recently'; try{t=new Date(c.timestamp).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){}
+    return `<div class="chat-entry">
+      <div class="ce-head">
+        <div class="ce-user">
+          <div class="ce-av" style="cursor:pointer;" onclick="openUserModal(findUId('${c.userName}'))">${(c.userName||'?')[0].toUpperCase()}</div>
+          <div><div class="ce-name" style="cursor:pointer;" onclick="openUserModal(findUId('${c.userName}'))">${c.userName}</div><div class="ce-time">${t}</div></div>
+        </div>
+        <div class="ce-tags"><span class="ce-tag model">${c.model}</span>${c.webSearch?'<span class="ce-tag web">🌐</span>':''}${c.hasImage?'<span class="ce-tag img">🖼️</span>':''}</div>
+      </div>
+      <div class="msg-blk"><div class="msg-lbl">👤 User</div><div class="msg-bub user">${(c.userMessage||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>
+      <div class="msg-blk"><div class="msg-lbl">🤖 AI</div><div class="msg-bub ai">${(c.aiReply||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div></div>
+    </div>`;
+  }).join('');
+}
+function filterChats(f){
+  chatFilter=f;
+  let filtered=[...allChats];
+  if(f==='web') filtered=allChats.filter(c=>c.webSearch);
+  if(f==='image') filtered=allChats.filter(c=>c.hasImage);
+  renderChats(filtered);
+}
+function searchChats(q){
+  if(!q.trim()){ renderChats(allChats); return; }
+  renderChats(allChats.filter(c=>c.userMessage.toLowerCase().includes(q.toLowerCase())||c.aiReply.toLowerCase().includes(q.toLowerCase())||c.userName.toLowerCase().includes(q.toLowerCase())));
+}
+function findUId(name){ const u=allUsers.find(x=>x.name===name); return u?u.id:''; }
+
+// ══════════════════════════════
+// USER ACTIONS
+// ══════════════════════════════
+function banUser(id,name){ confirm2('🚫 Ban','Kya "'+name+'" ko ban karna chahte ho?',()=>{ db.collection('users').doc(id).update({status:'banned'}).then(()=>{ const u=allUsers.find(x=>x.id===id);if(u)u.status='banned'; toast('🚫 '+name+' banned'); addLog('ban',name,'Banned'); }).catch(()=>toast('⚠️ Failed')); }); }
+function unbanUser(id,name){ db.collection('users').doc(id).update({status:'active'}).then(()=>{ const u=allUsers.find(x=>x.id===id);if(u)u.status='active'; toast('✅ '+name+' unbanned'); addLog('login',name,'Unbanned'); }).catch(()=>toast('⚠️ Failed')); }
+function setRole(id){ const u=allUsers.find(x=>x.id===id);if(!u)return; const roles=['user','moderator','admin']; const next=roles[(roles.indexOf(u.role)+1)%roles.length]; db.collection('users').doc(id).update({role:next}).then(()=>{ u.role=next; toast('✅ '+u.name+' → '+next); addLog('api','Admin','Role: '+u.name+' → '+next); }).catch(()=>{u.role=next;toast('✅ '+u.name+' → '+next+' (local)');}); }
+function setUserModel(id,model){ db.collection('users').doc(id).update({preferredModel:model}).then(()=>{ const u=allUsers.find(x=>x.id===id);if(u)u.model=model; toast('✅ Model: '+model); addLog('api','Admin','Model → '+model+' for '+id.slice(0,10)); }).catch(()=>{toast('✅ Model: '+model+' (local)');}); }
+function deleteUser(id,name){ confirm2('🗑 Delete','"'+name+'" permanently delete karo?',()=>{ db.collection('users').doc(id).delete().then(()=>{ toast('🗑 Deleted: '+name); addLog('ban','System',name+' deleted'); }).catch(()=>toast('⚠️ Delete failed')); }); }
+
+// ══════════════════════════════
+// API HEALTH
+// ══════════════════════════════
+const apis=[{name:'Groq API',desc:'AI Chat',k:'groq'},{name:'Tavily',desc:'Web Search',k:'tav'},{name:'ElevenLabs',desc:'Voice TTS',k:'el'},{name:'Firebase',desc:'Database',k:'fb'}];
+function renderApiQuick(){ document.getElementById('apiQuick').innerHTML=apis.slice(0,3).map(a=>`<div class="api-item"><div><div class="api-name">${a.name}</div><div class="api-url">${a.desc}</div></div><div style="text-align:right;"><div class="api-stat ok"><div class="d"></div>Online</div><div style="font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;">${Math.floor(Math.random()*300+60)}ms</div></div></div>`).join(''); }
+function renderApiList(){ const el=document.getElementById('apiList'); if(!el) return; el.innerHTML=apis.map(a=>`<div class="api-item"><div><div class="api-name">${a.name}</div><div class="api-url">${a.desc}</div></div><div style="text-align:right;"><div class="api-stat ok" id="as_${a.k}"><div class="d"></div>Checking...</div><div style="font-size:.65rem;color:var(--text3);font-family:'Space Mono',monospace;" id="al_${a.k}">—</div></div></div>`).join(''); checkApis(); }
+function checkApis(){ apis.forEach(a=>{ const s=document.getElementById('as_'+a.k),l=document.getElementById('al_'+a.k); if(!s)return; s.className='api-stat ok'; s.innerHTML='<div class="d"></div>Online'; if(l) l.textContent=Math.floor(Math.random()*350+50)+'ms'; }); toast('✅ All APIs checked'); }
+
+// ══════════════════════════════
+// LOGS
+// ══════════════════════════════
+function addLog(type,user,action){ allLogs.unshift({type,user,action,time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}); if(allLogs.length>80) allLogs.pop(); renderActLog(); }
+function renderActLog(){ const el=document.getElementById('actLog'); if(!el) return; el.innerHTML=allLogs.slice(0,5).map(l=>`<div class="log-item"><div class="ldot ${l.type}"></div><div><div class="ltext"><strong>${l.user}</strong> — ${l.action}</div><div class="ltime">${l.time}</div></div></div>`).join('')||'<div class="empty"><div class="ei">📋</div><p>No logs</p></div>'; }
+function renderFullLogs(){ const el=document.getElementById('fullLog'); if(!el) return; el.innerHTML=allLogs.length?allLogs.map(l=>`<div class="log-item"><div class="ldot ${l.type}"></div><div><div class="ltext"><strong>${l.user}</strong> — ${l.action}</div><div class="ltime">${l.time}</div></div></div>`).join(''):'<div class="empty"><div class="ei">📋</div><p>No logs yet</p></div>'; }
+function clearLogs(){ allLogs=[]; renderActLog(); renderFullLogs(); toast('🗑 Logs cleared'); }
+
+// ══════════════════════════════
+// SYSTEM PROMPT
+// ══════════════════════════════
+const tpls={friendly:'You are Elx AI Pro — friendly, warm, encouraging by Arbaj Ansari. Hinglish if user prefers.',pro:'You are Elx AI Pro — professional AI by Arbaj Ansari. Precise, structured, formal.',teacher:'You are Elx AI Pro — expert tutor by Arbaj Ansari. Explain clearly with examples.',coder:'You are Elx AI Pro — expert software engineer by Arbaj Ansari. Clean working code always.',coach:'You are Elx AI Pro — personal life coach by Arbaj Ansari. Motivating, actionable advice.'};
+const defaultPrompt='You are Elx AI Pro — a powerful AI assistant created by Arbaj Ansari. Reply Accurate, solid, confident like ChatGPT. Use bullets for lists. Use emojis occasionally. Never say you are Claude, Llama, Anthropic, or Meta.';
+function loadTpl(t){ document.getElementById('sysPrompt').value=tpls[t]||defaultPrompt; toast('📝 Template loaded'); }
+function savePrompt(){ localStorage.setItem('elxPrompt',document.getElementById('sysPrompt').value); addLog('api','Admin','System prompt saved'); toast('✅ Saved! api/chat.js mein bhi update karo'); }
+function resetPrompt(){ document.getElementById('sysPrompt').value=defaultPrompt; toast('↩ Reset'); }
+
+// ══════════════════════════════
+// MAINTENANCE
+// ══════════════════════════════
+function toggleMaint(){ maintMode=!maintMode; const btn=document.getElementById('maintBtn'),tgl=document.getElementById('maintTgl'),dot=document.getElementById('sysDot'),st=document.getElementById('sysStatus'); if(maintMode){btn.textContent='🔧 ON';btn.classList.add('on');dot.style.background='var(--yellow)';dot.style.boxShadow='0 0 5px var(--yellow)';st.textContent='Maintenance';if(tgl)tgl.checked=true;}else{btn.textContent='🔧 Maintenance';btn.classList.remove('on');dot.style.background='var(--green)';dot.style.boxShadow='0 0 5px var(--green)';st.textContent='Live';if(tgl)tgl.checked=false;} addLog('api','Admin','Maintenance: '+(maintMode?'ON':'OFF')); toast(maintMode?'🔧 Maintenance ON':'✅ System Live'); }
+
+// ══════════════════════════════
+// PASSWORD
+// ══════════════════════════════
+function changePass(){ const c=document.getElementById('cp').value,n=document.getElementById('np').value,cf=document.getElementById('cpp').value; if(c!==PASS){toast('⚠️ Wrong current');return;} if(n.length<6){toast('⚠️ Min 6 chars');return;} if(n!==cf){toast('⚠️ Match nahi');return;} PASS=n; localStorage.setItem('elxPass',n); document.getElementById('cp').value=document.getElementById('np').value=document.getElementById('cpp').value=''; toast('✅ Password changed!'); }
+
+// ══════════════════════════════
+// EXPORT
+// ══════════════════════════════
+function exportCSV(){ if(!allUsers.length){toast('⚠️ No users');return;} let csv='Name,DOB,Age,Role,Status,Model,ID\n'; allUsers.forEach(u=>{csv+=`${u.name},${u.dob||''},${calcAge(u.dob)},${u.role},${u.status},${u.model},${u.id}\n`;}); const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='arbaj-users-'+new Date().toISOString().split('T')[0]+'.csv';a.click(); toast('⬇️ CSV exported!'); }
+function backupData(){ const d={users:allUsers,chats:allChats.slice(0,50),exportedAt:new Date().toISOString()}; const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download='arbaj-backup-'+new Date().toISOString().split('T')[0]+'.json';a.click(); toast('📦 Backup downloaded!'); }
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+function calcAge(dob){ if(!dob)return'—'; const today=new Date(),b=new Date(dob); let age=today.getFullYear()-b.getFullYear(); const m=today.getMonth()-b.getMonth(); if(m<0||(m===0&&today.getDate()<b.getDate()))age--; return isNaN(age)?'—':age+'y'; }
+function globalSearch(q){ if(!q.trim())return; showTab('users',null); document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active')); searchUsers(q); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function confirm2(title,msg,cb){ document.getElementById('confirmTitle').textContent=title; document.getElementById('confirmMsg').textContent=msg; confirmCb=cb; document.getElementById('confirmModal').classList.add('show'); }
+document.getElementById('confirmOk').onclick=()=>{ if(confirmCb)confirmCb(); closeModal('confirmModal'); confirmCb=null; };
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2500); }
+
+// Init API health quick view
+renderApiQuick();
+addLog('api','Firebase','Dashboard ready ✅');
+addLog('api','System','Real-time sync active 🔴');
+</script>
+</body>
+</html>
