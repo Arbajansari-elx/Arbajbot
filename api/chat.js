@@ -103,7 +103,7 @@ Formatting & Structure (CRITICAL):
 - Use **bold text** to highlight important keywords or core concepts.
 - Use bullet points (-) or numbered lists for steps and features to make reading easy.
 - If providing code, ALWAYS use proper Markdown code blocks (\`\`\`) with the correct language tag. 
-- When teaching or explaining technical concepts, use a logical flow (e.g., Explain the concept -> Show the syntax -> Provide the code).
+- When teaching or explaining technical concepts and learning coding fresher, use a logical flow (e.g., Explain the concept -> Show the syntax -> Provide the code).
 
 Your ultimate goal is to provide a seamless, highly accurate, and premium experience to the user.
 User Name: ${userName || "there"}.`;
